@@ -1,0 +1,2 @@
+include ':app', ':switchbutton', ':clockview', ':rulerview', ':levelselectview'
+rootProject.name='uidemos'
