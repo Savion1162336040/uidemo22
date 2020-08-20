@@ -3,15 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="#ffffffff"
     android:layout_height="match_parent"
     tools:context=".SwitchDemo">
 
     <com.pengyeah.switchbutton.widget.SexSwitch
+        android:id="@+id/sexSwitch"
         android:layout_width="236dp"
         android:layout_height="104dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.pengyeah.switchbutton.widget.SmartisianSwitchButton
+        android:layout_width="250dp"
+        android:layout_height="100dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sexSwitch" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
