@@ -30,5 +30,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="层级选择控件" />
+    <Button
+        android:id="@+id/btn5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="做个锤子" />
 
 </LinearLayout>

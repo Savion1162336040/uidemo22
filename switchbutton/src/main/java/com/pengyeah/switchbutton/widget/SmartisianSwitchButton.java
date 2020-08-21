@@ -46,7 +46,7 @@ public class SmartisianSwitchButton extends View {
     @ColorInt
     int onColor = Color.parseColor("#ff9ab9ff");
     @ColorInt
-    int offColor = Color.parseColor("#fff9f9f9");
+    int offColor = Color.parseColor("#fff5f5f5");
 
     /**
      * 指示器颜色
@@ -88,6 +88,11 @@ public class SmartisianSwitchButton extends View {
      */
     int shadowOffset;
 
+    /**
+     * 开关状态
+     */
+    boolean isChecked;
+
     public SmartisianSwitchButton(Context context) {
         this(context, null);
     }
@@ -117,7 +122,7 @@ public class SmartisianSwitchButton extends View {
         this.height = h;
 
         this.backgroundAreaW = this.width * 3 / 4;
-        this.backgroundAreaH = this.height * 3 / 4;
+        this.backgroundAreaH = this.height / 2;
 
         this.indicatorR = backgroundAreaH / 2;
 
@@ -160,6 +165,7 @@ public class SmartisianSwitchButton extends View {
         //绘制on flag
         flagPaint.setStyle(Paint.Style.FILL);
         flagPaint.setColor(onColor);
+        flagPaint.clearShadowLayer();
         canvas.drawCircle(indicatorX + indicatorXOffset - backgroundAreaW * 3 / 5, height / 2, indicatorR / 4, flagPaint);
 
         //内阴影
@@ -199,8 +205,6 @@ public class SmartisianSwitchButton extends View {
         canvas.clipPath(offPath);
         canvas.drawPath(offPath, flagPaint);
 
-        flagPaint.clearShadowLayer();
-
         canvas.restore();
 
         canvas.restore();
@@ -215,7 +219,7 @@ public class SmartisianSwitchButton extends View {
         backgroundAreaPaint.setStyle(Paint.Style.STROKE);
         int strokeW = indicatorR / 2;
         backgroundAreaPaint.setStrokeWidth(strokeW);
-        backgroundAreaPaint.setColor(Color.parseColor("#ffbcbcbc"));
+        backgroundAreaPaint.setColor(Color.parseColor("#66bcbcbc"));
         backgroundAreaShadowSize = backgroundAreaH / 4;
         backgroundAreaShadowDistance = backgroundAreaH / 12;
         backgroundAreaPaint.setShadowLayer(backgroundAreaShadowSize + shadowOffset, 0, backgroundAreaShadowDistance, Color.GRAY);
@@ -244,7 +248,7 @@ public class SmartisianSwitchButton extends View {
         //绘制外阴影
         indicatorPaint.setColor(indicatorColor);
         indicatorPaint.setStyle(Paint.Style.FILL);
-        indicatorShadowSize = indicatorR / 4;
+        indicatorShadowSize = indicatorR / 3;
         indicatorShadowDistance = indicatorShadowSize / 2;
         indicatorPaint.setShadowLayer(indicatorShadowSize - shadowOffset, 0, indicatorShadowDistance, Color.parseColor("#ffc1c1c1"));
         canvas.drawCircle(indicatorX + indicatorXOffset, (height - backgroundAreaH) / 2 + indicatorR, indicatorR, indicatorPaint);
@@ -252,7 +256,7 @@ public class SmartisianSwitchButton extends View {
         //绘制内阴影
         canvas.save();
 
-        indicatorPaint.setColor(Color.GRAY);
+        indicatorPaint.setColor(Color.parseColor("#66bcbcbc"));
         int strokeW = indicatorR / 2;
         indicatorPaint.setStrokeWidth(strokeW);
         indicatorPaint.setStyle(Paint.Style.STROKE);
@@ -276,7 +280,30 @@ public class SmartisianSwitchButton extends View {
 
     int downX;
 
-    ValueAnimator shadowAnimator;
+    ValueAnimator shadowAnimator, translateAnimator;
+
+    /**
+     * @param isChecked true==>移动至on状态；false==>移动至off状态
+     */
+    void startTranslateAnim(boolean isChecked) {
+        if (translateAnimator != null) {
+            translateAnimator.cancel();
+        }
+        if (isChecked == true) {
+            translateAnimator = ValueAnimator.ofInt(indicatorX + indicatorXOffset, width - (width - backgroundAreaW) / 2 - indicatorR);
+        } else {
+            translateAnimator = ValueAnimator.ofInt(indicatorX + indicatorXOffset, (width - backgroundAreaW) / 2 + indicatorR);
+        }
+        translateAnimator.setDuration(200L);
+        translateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                indicatorX = (int) valueAnimator.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+        translateAnimator.start();
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -287,7 +314,7 @@ public class SmartisianSwitchButton extends View {
                 if (shadowAnimator != null) {
                     shadowAnimator.cancel();
                 }
-                shadowAnimator = ValueAnimator.ofInt(0, 20);
+                shadowAnimator = ValueAnimator.ofInt(0, indicatorR / 4);
                 shadowAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
@@ -301,12 +328,11 @@ public class SmartisianSwitchButton extends View {
             case MotionEvent.ACTION_UP:
                 downX = 0;
                 indicatorX = indicatorX + indicatorXOffset;
-                indicatorXOffset = 0;
                 //开始阴影变化动画
                 if (shadowAnimator != null) {
                     shadowAnimator.cancel();
                 }
-                shadowAnimator = ValueAnimator.ofInt(20, 0);
+                shadowAnimator = ValueAnimator.ofInt(indicatorR / 4, 0);
                 shadowAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
@@ -316,6 +342,22 @@ public class SmartisianSwitchButton extends View {
                 });
                 shadowAnimator.setDuration(200L);
                 shadowAnimator.start();
+                //移动动画,切换动画
+                if (Math.abs(indicatorXOffset) <= 20) {
+                    //视作点击
+                    isChecked = !isChecked;
+                    startTranslateAnim(isChecked);
+                } else if ((indicatorXOffset > 0 && indicatorXOffset >= (backgroundAreaW - 2 * indicatorR) / 2) || (indicatorXOffset < 0 && indicatorXOffset > -(backgroundAreaW - 2 * indicatorR) / 2)) {
+                    indicatorXOffset = 0;
+                    //切换状态:ON
+                    isChecked = true;
+                    startTranslateAnim(true);
+                } else if ((indicatorXOffset > 0 && indicatorXOffset < (backgroundAreaW - 2 * indicatorR) / 2) || (indicatorXOffset < 0 && indicatorXOffset <= -(backgroundAreaW - 2 * indicatorR) / 2)) {
+                    indicatorXOffset = 0;
+                    //切换状态:OFF
+                    isChecked = false;
+                    startTranslateAnim(false);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 indicatorXOffset = (int) (event.getX() - downX);
