@@ -219,7 +219,7 @@ public class SmartisianSwitchButton extends View {
         backgroundAreaPaint.setStyle(Paint.Style.STROKE);
         int strokeW = indicatorR / 2;
         backgroundAreaPaint.setStrokeWidth(strokeW);
-        backgroundAreaPaint.setColor(Color.parseColor("#66bcbcbc"));
+        backgroundAreaPaint.setColor(Color.parseColor("#ffbcbcbc"));
         backgroundAreaShadowSize = backgroundAreaH / 4;
         backgroundAreaShadowDistance = backgroundAreaH / 12;
         backgroundAreaPaint.setShadowLayer(backgroundAreaShadowSize + shadowOffset, 0, backgroundAreaShadowDistance, Color.GRAY);
@@ -256,7 +256,7 @@ public class SmartisianSwitchButton extends View {
         //绘制内阴影
         canvas.save();
 
-        indicatorPaint.setColor(Color.parseColor("#66bcbcbc"));
+        indicatorPaint.setColor(Color.parseColor("#ffbcbcbc"));
         int strokeW = indicatorR / 2;
         indicatorPaint.setStrokeWidth(strokeW);
         indicatorPaint.setStyle(Paint.Style.STROKE);
