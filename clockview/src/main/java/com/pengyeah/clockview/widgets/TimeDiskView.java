@@ -15,7 +15,7 @@ import com.pengyeah.clockview.utils.LogUtils;
 import java.util.Calendar;
 
 /**
- * Created by pupu on 2018/4/4.
+ * Created by pengyeah on 2018/4/4.
  * 时钟圆盘View
  */
 

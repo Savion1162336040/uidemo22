@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import com.pengyeah.clockview.utils.DisplayUtils;
 
 /**
- * Created by pupu on 2018/4/5.
+ * Created by pengyeah on 2018/4/5.
  */
 
 public class AmPmDiskView extends DiskView {

@@ -11,7 +11,7 @@ import android.view.animation.DecelerateInterpolator;
 import androidx.annotation.Nullable;
 
 /**
- * Created by pupu on 2018/4/2.
+ * Created by pengyeah on 2018/4/2.
  */
 
 public class DiskView extends View {

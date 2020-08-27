@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 import com.pengyeah.clockview.utils.DisplayUtils;
 
 /**
- * Created by pupu on 2018/4/3.
+ * Created by pengyeah on 2018/4/3.
  */
 
 public class SecondDiskView extends DiskView {

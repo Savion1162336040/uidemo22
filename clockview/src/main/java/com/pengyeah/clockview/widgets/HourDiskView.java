@@ -15,7 +15,7 @@ import com.pengyeah.clockview.utils.DisplayUtils;
 import com.pengyeah.clockview.utils.LogUtils;
 
 /**
- * Created by pupu on 2018/4/3.
+ * Created by pengyeah on 2018/4/3.
  */
 
 public class HourDiskView extends DiskView {
