@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.pengyeah.clockview.utils.DisplayUtils;
 import com.pengyeah.clockview.utils.LogUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.Calendar;
 
 /**
@@ -56,40 +57,48 @@ public class TimeDiskView extends ViewGroup {
 
     MyHandler handler;
 
-    class MyHandler extends Handler {
+    static class MyHandler extends Handler {
+
+        private WeakReference<TimeDiskView> mWeakReference;
+
+        public MyHandler(TimeDiskView timeDiskView) {
+            mWeakReference = new WeakReference<>(timeDiskView);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            TimeDiskView timeDiskView = mWeakReference.get();
             switch (msg.what) {
                 case MSG_UPDATE_TV_TIME:
-                    LogUtils.i(TAG, "minute==>" + minute);
-                    if (isNoon == true) {
-                        hour24 = hour + 12;
-                        if (hour24 == 24) {
-                            hour24 = 0;
+                    LogUtils.i(TAG, "minute==>" + timeDiskView.minute);
+                    if (timeDiskView.isNoon == true) {
+                        timeDiskView.hour24 = timeDiskView.hour + 12;
+                        if (timeDiskView.hour24 == 24) {
+                            timeDiskView.hour24 = 0;
                         }
                     } else {
-                        hour24 = hour;
+                        timeDiskView.hour24 = timeDiskView.hour;
                     }
-                    if (hour24 >= 10) {
-                        if (minute >= 10) {
-                            tv_time.setText(hour24 + ":" + minute);
+                    if (timeDiskView.hour24 >= 10) {
+                        if (timeDiskView.minute >= 10) {
+                            timeDiskView.tv_time.setText(timeDiskView.hour24 + ":" + timeDiskView.minute);
                         } else {
-                            tv_time.setText(hour24 + ":0" + minute);
+                            timeDiskView.tv_time.setText(timeDiskView.hour24 + ":0" + timeDiskView.minute);
                         }
                     } else {
-                        if (minute >= 10) {
-                            tv_time.setText("0" + hour24 + ":" + minute);
+                        if (timeDiskView.minute >= 10) {
+                            timeDiskView.tv_time.setText("0" + timeDiskView.hour24 + ":" + timeDiskView.minute);
                         } else {
-                            tv_time.setText("0" + hour24 + ":0" + minute);
+                            timeDiskView.tv_time.setText("0" + timeDiskView.hour24 + ":0" + timeDiskView.minute);
                         }
                     }
                     break;
                 case MSG_GET_CUR_TIME:
-                    showCurTime();
-                    if (!isStop) {
+                    timeDiskView.showCurTime();
+                    if (!timeDiskView.isStop) {
                         sendEmptyMessageDelayed(MSG_GET_CUR_TIME, 1000);
-                        handler.sendEmptyMessage(MSG_UPDATE_TV_TIME);
+                        timeDiskView.handler.sendEmptyMessage(MSG_UPDATE_TV_TIME);
                     }
                     break;
                 default:
@@ -100,7 +109,7 @@ public class TimeDiskView extends ViewGroup {
 
     private void initView(Context context, AttributeSet attrs) {
         if (handler == null) {
-            handler = new MyHandler();
+            handler = new MyHandler(this);
         }
 
         //获取屏幕宽高

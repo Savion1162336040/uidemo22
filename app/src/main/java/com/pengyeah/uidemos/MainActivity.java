@@ -47,5 +47,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, SmaritisanDemo.class));
             }
         });
+        findViewById(R.id.btn6).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ElecTimeViewDemo.class));
+            }
+        });
     }
 }
