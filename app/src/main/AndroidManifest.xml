@@ -15,9 +15,11 @@
         <activity android:name=".SmaritisanDemo" />
         <activity android:name=".LevelSelectViewDemo" />
         <activity android:name=".RulerViewDemo" />
-        <activity android:name=".ClockViewDemo" />
+        <activity android:name=".ClockViewDemo"
+            android:screenOrientation="portrait"/>
         <activity android:name=".SwitchDemo" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
