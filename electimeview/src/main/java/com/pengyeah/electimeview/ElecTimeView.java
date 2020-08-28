@@ -34,6 +34,9 @@ public class ElecTimeView extends RelativeLayout {
         @Override
         public void handleMessage(Message msg) {
             ElecTimeView elecTimeView = mWeakReference.get();
+            if (elecTimeView == null) {
+                return;
+            }
             if (msg.what == 0x01) {
                 int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
                 int minute = Calendar.getInstance().get(Calendar.MINUTE);

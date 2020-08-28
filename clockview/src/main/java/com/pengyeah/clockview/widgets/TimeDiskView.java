@@ -69,6 +69,9 @@ public class TimeDiskView extends ViewGroup {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             TimeDiskView timeDiskView = mWeakReference.get();
+            if (timeDiskView == null) {
+                return;
+            }
             switch (msg.what) {
                 case MSG_UPDATE_TV_TIME:
                     LogUtils.i(TAG, "minute==>" + timeDiskView.minute);
