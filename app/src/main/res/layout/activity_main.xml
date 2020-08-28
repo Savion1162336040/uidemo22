@@ -50,6 +50,12 @@
                 android:id="@+id/btn6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="液体流动" />
+
+            <Button
+                android:id="@+id/btn7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="像素电子时钟" />
 
             <TextView

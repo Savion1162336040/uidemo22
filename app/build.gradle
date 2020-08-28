@@ -31,6 +31,7 @@ dependencies {
 
     api project(":clockview")
     api project(":rulerview")
+    api project(":flowview")
     api project(":levelselectview")
     api project(":electimeview")
     implementation 'androidx.cardview:cardview:1.0.0'
