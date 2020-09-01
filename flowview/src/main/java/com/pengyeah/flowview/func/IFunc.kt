@@ -1,6 +1,11 @@
 package com.pengyeah.flowview.func
 
-interface IFunc<T,R> {
+/**
+ *  Created by pupu on 2020/9/1
+ *  佛祖开光，永无bug
+ *  God bless U
+ */
+interface IFunc {
 
-    fun execute(vararg params:T):R
+    fun execute(inParam: Float): Float
 }

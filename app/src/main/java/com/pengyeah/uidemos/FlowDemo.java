@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
@@ -43,7 +44,7 @@ public class FlowDemo extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                seekBar.setMax(toutiaoLoading2.getBounds().height());
+                seekBar.setMax(toutiaoLoading2.getBounds().height() - 20);
                 seekBar.setProgress(0);
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
@@ -63,5 +64,12 @@ public class FlowDemo extends AppCompatActivity {
                 });
             }
         }, 1000l);
+
+        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toutiaoLoading2.startAnim();
+            }
+        });
     }
 }

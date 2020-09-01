@@ -1,20 +1,23 @@
 package com.pengyeah.flowview
 
+import android.animation.ValueAnimator
 import android.graphics.*
 import android.graphics.drawable.Drawable
-import com.pengyeah.flowview.coordinate.Point
+import com.pengyeah.flowview.coordinate.Coordinate
 import com.pengyeah.flowview.func.Func1
 import com.pengyeah.flowview.func.Func2
+import com.pengyeah.flowview.func.Func3
+import com.pengyeah.flowview.func.Func4
 
 class ToutiaoLoading2 : Drawable {
 
-    val pointA: Point = Point()
+    val pointA: Coordinate = Coordinate()
 
-    val pointB: Point = Point(func = Func1())
+    val pointB: Coordinate = Coordinate()
 
-    val pointC: Point = Point(func = Func1())
+    val pointC: Coordinate = Coordinate()
 
-    val pointD: Point = Point()
+    val pointD: Coordinate = Coordinate()
 
     val mPath: Path = Path()
 
@@ -30,31 +33,35 @@ class ToutiaoLoading2 : Drawable {
     override fun draw(canvas: Canvas) {
 
         mPath.reset()
-        mPath.moveTo(pointA.x.toFloat(), pointA.y.toFloat())
-        mPath.lineTo(pointB.x.toFloat(), pointB.y.toFloat())
-        mPath.lineTo(pointC.x.toFloat(), pointC.y.toFloat())
-        mPath.lineTo(pointD.x.toFloat(), pointD.y.toFloat())
+        mPath.moveTo(pointA.x, pointA.y)
+        mPath.lineTo(pointB.x, pointB.y)
+        mPath.lineTo(pointC.x, pointC.y)
+        mPath.lineTo(pointD.x, pointD.y)
         mPath.close()
 
         canvas.drawPath(mPath, mPaint)
-
     }
 
     override fun setBounds(left: Int, top: Int, right: Int, bottom: Int) {
         super.setBounds(left, top, right, bottom)
         //初始化A、B、C、D
-        pointA.x = mPaint.strokeWidth.toInt()
-        pointA.y = mPaint.strokeWidth.toInt() + bounds.height() / 10
+        pointA.x = 2 * mPaint.strokeWidth
+        pointA.y = 2 * mPaint.strokeWidth
 
-        pointB.x = bounds.right - mPaint.strokeWidth.toInt()
-        pointB.y = bounds.bottom - mPaint.strokeWidth.toInt()
+        pointB.x = bounds.right - 2 * mPaint.strokeWidth
+        pointB.y = bounds.top.toFloat() + mPaint.strokeWidth
 
-        pointC.x = bounds.right - mPaint.strokeWidth.toInt()
-        pointC.y = mPaint.strokeWidth.toInt() + bounds.height() / 10
+        pointC.x = bounds.right - 2 * mPaint.strokeWidth
+        pointC.y = bounds.bottom - 3 * mPaint.strokeWidth
 
-        pointD.x = mPaint.strokeWidth.toInt()
-        pointD.y = bounds.bottom - mPaint.strokeWidth.toInt()
+        pointD.x = 2 * mPaint.strokeWidth
+        pointD.y = bounds.bottom - 2 * mPaint.strokeWidth
 
+        //初始化变化函数
+        pointA.yFunc = Func1(pointA.y, bounds.height() - 4 * mPaint.strokeWidth)
+        pointB.yFunc = Func2(pointB.y, bounds.height() - 4 * mPaint.strokeWidth)
+        pointC.yFunc = Func3(pointC.y, bounds.height() - 4 * mPaint.strokeWidth)
+        pointD.yFunc = Func4(pointD.y, bounds.height() - 4 * mPaint.strokeWidth)
     }
 
     override fun setAlpha(alpha: Int) {
@@ -68,13 +75,45 @@ class ToutiaoLoading2 : Drawable {
     }
 
     fun transform(offset: Int) {
-        if (offset <= bounds.height() / 2) {
-            pointB.y = bounds.bottom - mPaint.strokeWidth.toInt() - pointB.func.execute(2 * offset)
-            pointC.y = pointC.func.execute(2 * offset)
-        } else {
-            pointB.y = mPaint.strokeWidth.toInt()
-            pointC.y = bounds.bottom - mPaint.strokeWidth.toInt() - bounds.height() / 10
+        pointA.yFunc?.let {
+            pointA.y = it.execute(offset.toFloat())
+        }
+        pointB.yFunc?.let {
+            pointB.y = it.execute(offset.toFloat())
+        }
+        pointC.yFunc?.let {
+            pointC.y = it.execute(offset.toFloat())
+        }
+        pointD.yFunc?.let {
+            pointD.y = it.execute(offset.toFloat())
         }
         invalidateSelf()
+    }
+
+    var animator: ValueAnimator? = null
+
+    fun startAnim() {
+        animator?.cancel()
+        animator = ValueAnimator.ofFloat(0F, bounds.height() - 20F)
+        animator?.duration = 800L
+        animator?.addUpdateListener {
+            val offset: Float = it.animatedValue as Float
+            pointA.yFunc?.let {
+                pointA.y = it.execute(offset.toFloat())
+            }
+            pointB.yFunc?.let {
+                pointB.y = it.execute(offset.toFloat())
+            }
+            pointC.yFunc?.let {
+                pointC.y = it.execute(offset.toFloat())
+            }
+            pointD.yFunc?.let {
+                pointD.y = it.execute(offset.toFloat())
+            }
+            invalidateSelf()
+        }
+        animator?.reverse()
+        animator?.repeatCount = -1
+        animator?.start()
     }
 }

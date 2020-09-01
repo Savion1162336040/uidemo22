@@ -5,17 +5,15 @@ package com.pengyeah.flowview.func
  *  佛祖开光，永无bug
  *  God bless U
  */
-class Func1 : BaseFuncImpl {
+class Func3 : BaseFuncImpl {
 
     constructor(initValue: Float, inParamMax: Float) : super(initValue, inParamMax)
 
     override fun execute(offset: Float): Float {
-        if (offset > inParamMax / 2 && offset <= inParamMax) {
-            return initValue + 2 * (offset - (inParamMax / 2))
-        } else if (offset > inParamMax) {
-            return initValue + inParamMax
+        if (offset <= inParamMax / 2) {
+            return initValue - 2 * offset
         } else {
-            return initValue
+            return initValue - inParamMax
         }
     }
 }
