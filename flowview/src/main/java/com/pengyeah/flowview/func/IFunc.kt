@@ -7,5 +7,15 @@ package com.pengyeah.flowview.func
  */
 interface IFunc {
 
+    /**
+     * 初始值
+     */
+    var initValue: Float
+
+    /**
+     * 入参的阈值
+     */
+    var inParamMax: Float
+
     fun execute(inParam: Float): Float
 }

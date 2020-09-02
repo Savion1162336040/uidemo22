@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn6).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, FlowDemo.class));
+                startActivity(new Intent(MainActivity.this, FlowDemo2.class));
             }
         });
         findViewById(R.id.btn7).setOnClickListener(new View.OnClickListener() {

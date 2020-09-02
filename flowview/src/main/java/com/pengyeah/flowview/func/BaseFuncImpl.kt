@@ -7,20 +7,14 @@ package com.pengyeah.flowview.func
  */
 open class BaseFuncImpl : IFunc {
 
-    /**
-     * 初始值
-     */
-    var initValue: Float = 0F
-
-    /**
-     * 入参的阈值
-     */
-    var inParamMax: Float = 0F
 
     constructor(initValue: Float, inParamMax: Float) {
         this.initValue = initValue
         this.inParamMax = inParamMax
     }
+
+    override var initValue: Float
+    override var inParamMax: Float
 
     override fun execute(inParam: Float): Float {
         return 0F
