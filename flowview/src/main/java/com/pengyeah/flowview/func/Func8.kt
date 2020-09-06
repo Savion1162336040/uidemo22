@@ -11,8 +11,6 @@ class Func8 : BaseFuncImpl {
 
     var rate: Float = 0F
 
-    var inParamMin:Float = 0F
-
     override fun execute(inParam: Float): Float {
         super.execute(inParam)
         val offset = inParam * rate

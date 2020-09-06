@@ -17,5 +17,21 @@ interface IFunc {
      */
     var inParamMax: Float
 
+    /**
+     * 入参的阈值
+     */
+    var inParamMin: Float
+
+    /**
+     * 出参的阈值
+     */
+    var outParamMax:Float
+
+
+    /**
+     * 出参的阈值
+     */
+    var outParamMin:Float
+
     fun execute(inParam: Float): Float
 }

@@ -14,10 +14,10 @@ class Func7 : BaseFuncImpl {
     override fun execute(inParam: Float): Float {
         super.execute(inParam)
         val offset = inParam * rate
-        if (initValue + offset > 0 && initValue + offset < inParamMax) {
+        if (initValue + offset > inParamMin && initValue + offset < inParamMax) {
             return initValue + offset
-        } else if (initValue + offset <= 0) {
-            return 0F
+        } else if (initValue + offset <= inParamMin) {
+            return inParamMin
         } else {
             return inParamMax
         }

@@ -9,21 +9,24 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.Animation
 import android.view.animation.BounceInterpolator
+import android.view.animation.TranslateAnimation
+import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
 import androidx.core.animation.addListener
 import com.pengyeah.flowview.coordinate.Coordinate
-import com.pengyeah.flowview.func.Func5
-import com.pengyeah.flowview.func.Func6
-import com.pengyeah.flowview.func.Func7
-import com.pengyeah.flowview.func.Func8
+import com.pengyeah.flowview.func.*
 
 /**
  *  Created by pupu on 2020/9/1
  *  佛祖开光，永无bug
  *  God bless U
  */
-class FlowView : View {
+
+class FlowView : ImageView {
 
     val TAG: String? = FlowView::class.simpleName
 
@@ -53,7 +56,7 @@ class FlowView : View {
     var paint: Paint = Paint()
 
     @ColorInt
-    var color: Int = Color.RED
+    var color: Int = Color.TRANSPARENT
 
     /**
      * 是否为展开状态
@@ -79,15 +82,21 @@ class FlowView : View {
     }
 
     override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-
         drawWave(canvas)
+        drawIndicator(canvas)
+
+        super.onDraw(canvas)
+    }
+
+    private fun drawIndicator(canvas: Canvas?) {
+
     }
 
     private fun drawWave(canvas: Canvas?) {
         canvas?.let {
             configPath()
-            it.drawPath(path, paint)
+//            it.drawPath(path, paint)
+            it.clipPath(path)
         }
     }
 
@@ -102,55 +111,34 @@ class FlowView : View {
 
         pointA.x = width - oriWaveHeight / 4
         pointA.y = waveLineHeight - oriWaveHeight
-        pointA.xFunc = Func5(pointA.x, pointA.x)
-        val pointAyFunc = Func7(pointA.y, pointA.y)
-        pointAyFunc.rate = 3 * width / height.toFloat()
-        pointA.yFunc = pointAyFunc
 
 
         pointB.x = width - oriWaveHeight / 4
         pointB.y = waveLineHeight - 3 * oriWaveHeight / 4
-        pointB.xFunc = Func5(pointB.x, pointB.x)
-        val pointByFunc = Func7(pointB.y, pointB.y)
-        pointByFunc.rate = 2 * width / height.toFloat()
-        pointB.yFunc = pointByFunc
+
+
 
         pointC.x = width - oriWaveHeight / 2
         pointC.y = waveLineHeight - oriWaveHeight / 2
-        pointC.xFunc = Func5(pointC.x, pointC.x)
-        val pointCyFunc = Func7(pointC.y, pointC.y)
-        pointCyFunc.rate = width / height.toFloat()
-        pointC.yFunc = pointCyFunc
+
 
         pointD = getPointDCoordinate(pointB, pointC)
 
         pointE.x = width - oriWaveHeight / 2
         pointE.y = waveLineHeight + oriWaveHeight / 2
-        pointE.xFunc = Func5(pointE.x, pointE.x)
-        val pointEyFunc = Func8(pointE.y, height.toFloat())
-        pointEyFunc.rate = width / height.toFloat()
-//        pointEyFunc.rate = 2 * ((height - pointE.y) / (height - pointE.y - oriWaveHeight / 4)) * width / height.toFloat()
-        pointEyFunc.inParamMin = pointE.y
-        pointE.yFunc = pointEyFunc
+
 
         pointF.x = width - oriWaveHeight / 4
         pointF.y = waveLineHeight + 3 * oriWaveHeight / 4
-        pointF.xFunc = Func5(pointF.x, pointF.x)
-        val pointFyFunc = Func8(pointF.y, height.toFloat())
-        pointFyFunc.rate = 2 * width / height.toFloat()
-        pointFyFunc.inParamMin = pointF.y
-        pointF.yFunc = pointFyFunc
+
 
         pointG.x = width - oriWaveHeight / 4
         pointG.y = waveLineHeight + oriWaveHeight
-        pointG.xFunc = Func5(pointG.x, pointG.x)
-        val pointGyFunc = Func8(pointG.y, height.toFloat())
-        pointGyFunc.rate = 3 * width / height.toFloat()
-        pointGyFunc.inParamMin = pointG.y
-        pointG.yFunc = pointGyFunc
 
         //init path
         configPath()
+
+        configExpandFunc()
     }
 
     private fun configPath(): Path {
@@ -174,13 +162,13 @@ class FlowView : View {
         path.lineTo(pointG.x, height.toFloat())
         path.lineTo(width.toFloat(), height.toFloat())
 
-        path.addCircle(pointA.x, pointA.y, 10F, Path.Direction.CW)
-        path.addCircle(pointB.x, pointB.y, 10F, Path.Direction.CW)
-        path.addCircle(pointC.x, pointC.y, 10F, Path.Direction.CW)
-        path.addCircle(pointD.x, pointD.y, 10F, Path.Direction.CW)
-        path.addCircle(pointE.x, pointE.y, 10F, Path.Direction.CW)
-        path.addCircle(pointF.x, pointF.y, 10F, Path.Direction.CW)
-        path.addCircle(pointG.x, pointG.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointA.x, pointA.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointB.x, pointB.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointC.x, pointC.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointD.x, pointD.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointE.x, pointE.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointF.x, pointF.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointG.x, pointG.y, 10F, Path.Direction.CW)
 
         path.close()
 
@@ -188,8 +176,8 @@ class FlowView : View {
     }
 
     fun getPointDCoordinate(pointB: Coordinate, pointC: Coordinate): Coordinate {
-        val dy = Math.abs(pointC.y - pointB.y)
-        val dx = Math.abs(pointC.x - pointB.x)
+        val dy = pointC.y - pointB.y
+        val dx = pointB.x - pointC.x
         //B点到D点的距离
         val tempDy = waveLineHeight - pointB.y
         pointD.x = pointB.x - (dx * tempDy / dy)
@@ -218,11 +206,11 @@ class FlowView : View {
 
     var offsetAnimator: ValueAnimator? = null
 
-    fun startAnim() {
+    fun startExpandAnim() {
         offsetAnimator?.cancel()
         offsetAnimator = ValueAnimator.ofFloat(offsetX, -width.toFloat())
         offsetAnimator?.let {
-            it.duration = 300L
+            it.duration = 800L
             it.interpolator = BounceInterpolator()
             it.addUpdateListener {
                 val tempOffsetX: Float = it.animatedValue as Float
@@ -230,9 +218,9 @@ class FlowView : View {
                 executePointFunc(pointB, tempOffsetX)
                 executePointFunc(pointC, tempOffsetX)
                 getPointDCoordinate(pointB, pointC)
-                Log.i("pengyeah", "pointB==>" + pointB.toString())
-                Log.i("pengyeah", "pointC==>" + pointC.toString())
-                Log.i("pengyeah", "pointD==>" + pointD.toString())
+//                Log.i("pengyeah", "pointB==>" + pointB.toString())
+//                Log.i("pengyeah", "pointC==>" + pointC.toString())
+//                Log.i("pengyeah", "pointD==>" + pointD.toString())
                 executePointFunc(pointE, tempOffsetX)
                 executePointFunc(pointF, tempOffsetX)
                 executePointFunc(pointG, tempOffsetX)
@@ -243,6 +231,10 @@ class FlowView : View {
             it.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     super.onAnimationEnd(animation)
+
+                    //重新设置变换函数
+                    configShrinkFunc()
+
                     resetInitValueFunc(pointA)
                     resetInitValueFunc(pointB)
                     resetInitValueFunc(pointC)
@@ -254,22 +246,35 @@ class FlowView : View {
             })
             it.start()
         }
-
+        isExpanded = true
+        listener?.onStateChanged(STATE_EXPANDED)
     }
 
-    var downX: Float = 0F
-    var downY: Float = 0F
-    var offsetX: Float = 0F
+    fun startShrinkAnim() {
+        offsetAnimator?.cancel()
+        offsetAnimator = ValueAnimator.ofFloat(offsetX, width.toFloat())
+        offsetAnimator?.let {
+            it.duration = 800L
+            it.interpolator = AccelerateDecelerateInterpolator()
+            it.addUpdateListener {
+                val tempOffsetX: Float = it.animatedValue as Float
+                executePointFunc(pointA, tempOffsetX)
+                executePointFunc(pointB, tempOffsetX)
+                executePointFunc(pointC, tempOffsetX)
+                getPointDCoordinate(pointB, pointC)
+                executePointFunc(pointE, tempOffsetX)
+                executePointFunc(pointF, tempOffsetX)
+                executePointFunc(pointG, tempOffsetX)
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        event?.let {
-            when (it.action) {
-                MotionEvent.ACTION_UP -> {
-//                    startAnim()
+                postInvalidate()
+            }
 
-                    downX = 0F
-                    downY = 0F
-                    offsetX = 0F
+            it.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+
+                    //重新设置变换函数
+                    configExpandFunc()
 
                     resetInitValueFunc(pointA)
                     resetInitValueFunc(pointB)
@@ -279,32 +284,240 @@ class FlowView : View {
                     resetInitValueFunc(pointF)
                     resetInitValueFunc(pointG)
                 }
+            })
+            it.start()
+        }
+        isExpanded = false
+        listener?.onStateChanged(STATE_SHRINKED)
+    }
+
+    fun configExpandFunc() {
+        pointA.xFunc = Func5(pointA.x, pointA.x)
+        val pointAyFunc = Func7(pointA.y, pointA.y)
+        pointAyFunc.rate = 3 * width / height.toFloat()
+        pointA.yFunc = pointAyFunc
+
+        pointB.xFunc = Func5(pointB.x, pointB.x)
+        val pointByFunc = Func7(pointB.y, pointB.y)
+        pointByFunc.rate = 2 * width / height.toFloat()
+        pointB.yFunc = pointByFunc
+
+        pointC.xFunc = Func5(pointC.x, pointC.x)
+        val pointCyFunc = Func7(pointC.y, pointC.y)
+        pointCyFunc.rate = width / height.toFloat()
+        pointC.yFunc = pointCyFunc
+
+        pointE.xFunc = Func5(pointE.x, pointE.x)
+        val pointEyFunc = Func8(pointE.y, height.toFloat())
+        pointEyFunc.rate = width / height.toFloat()
+//        pointEyFunc.rate = 2 * ((height - pointE.y) / (height - pointE.y - oriWaveHeight / 4)) * width / height.toFloat()
+        pointEyFunc.inParamMin = pointE.y
+        pointE.yFunc = pointEyFunc
+
+        pointF.xFunc = Func5(pointF.x, pointF.x)
+        val pointFyFunc = Func8(pointF.y, height.toFloat())
+        pointFyFunc.rate = 2 * width / height.toFloat()
+        pointFyFunc.inParamMin = pointF.y
+        pointF.yFunc = pointFyFunc
+
+        pointG.xFunc = Func5(pointG.x, pointG.x)
+        val pointGyFunc = Func8(pointG.y, height.toFloat())
+        pointGyFunc.rate = 3 * width / height.toFloat()
+        pointGyFunc.inParamMin = pointG.y
+        pointG.yFunc = pointGyFunc
+    }
+
+    fun configShrinkFunc() {
+
+        val pointAyFunc = Func9(0F, width.toFloat())
+        pointAyFunc.inParamMax = width.toFloat()
+        pointAyFunc.inParamMin = 0F
+        pointAyFunc.outParamMax = waveLineHeight - oriWaveHeight
+        pointAyFunc.outParamMin = 0F
+        pointAyFunc.initValue = 0F
+        pointA.yFunc = pointAyFunc
+
+        val pointByFunc = Func10(0F, width.toFloat())
+        pointByFunc.inParamMax = width.toFloat()
+        pointByFunc.inParamMin = 0F
+        pointByFunc.outParamMax = waveLineHeight - 3 * oriWaveHeight / 4
+        pointByFunc.outParamMin = 0F
+        pointByFunc.initValue = 0F
+        pointB.yFunc = pointByFunc
+
+//        val pointCxFunc = Func15(0F, width.toFloat())
+//        pointCxFunc.inParamMax = width.toFloat()
+//        pointCxFunc.inParamMin = 0F
+//        pointCxFunc.outParamMax = width - oriWaveHeight / 2
+//        pointCxFunc.outParamMin = 0F
+//        pointCxFunc.initValue = 0F
+//        pointCxFunc.rate = 1.1F
+//        pointC.xFunc = pointCxFunc
+
+        val pointCyFunc = Func11(pointC.y, width.toFloat())
+        pointCyFunc.inParamMax = width.toFloat()
+        pointCyFunc.inParamMin = 0F
+        pointCyFunc.outParamMax = waveLineHeight - oriWaveHeight / 2
+        pointCyFunc.outParamMin = pointC.y
+        pointCyFunc.initValue = pointC.y
+        pointC.yFunc = pointCyFunc
+
+
+        val pointEyFunc = Func12(0F, width.toFloat())
+        pointEyFunc.inParamMax = width.toFloat()
+        pointEyFunc.inParamMin = 0F
+        pointEyFunc.outParamMax = pointE.y
+        pointEyFunc.outParamMin = waveLineHeight + oriWaveHeight / 2
+        pointEyFunc.initValue = pointE.y
+        pointE.yFunc = pointEyFunc
+
+        val pointFyFunc = Func13(0F, width.toFloat())
+        pointFyFunc.inParamMax = width.toFloat()
+        pointFyFunc.inParamMin = 0F
+        pointFyFunc.outParamMax = pointF.y
+        pointFyFunc.outParamMin = waveLineHeight + 3 * oriWaveHeight / 4
+        pointFyFunc.initValue = pointE.y
+        pointF.yFunc = pointFyFunc
+
+        val pointGyFunc = Func14(0F, width.toFloat())
+        pointGyFunc.inParamMax = width.toFloat()
+        pointGyFunc.inParamMin = 0F
+        pointGyFunc.outParamMax = pointG.y
+        pointGyFunc.outParamMin = waveLineHeight + oriWaveHeight
+        pointGyFunc.initValue = pointE.y
+        pointG.yFunc = pointGyFunc
+    }
+
+    fun isInWavePathRegion(x: Float, y: Float): Boolean {
+        val rectF = RectF()
+        path.computeBounds(rectF, true)
+        val region = Region()
+        region.setPath(path, Region(rectF.left.toInt(), rectF.top.toInt(), rectF.right.toInt(), rectF.bottom.toInt()))
+        if (region.contains(x.toInt(), y.toInt())) {
+            return true
+        }
+        return false
+    }
+
+    var downX: Float = 0F
+    var downY: Float = 0F
+    var offsetX: Float = 0F
+    // 判断某次操作是否有效，用于将事件向下传递
+    var isEffectOperation: Boolean = false
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let {
+            when (it.action) {
+                MotionEvent.ACTION_UP -> {
+                    if (isEffectOperation == false) {
+                        return super.onTouchEvent(event)
+                    }
+                    if (!isExpanded) {
+                        startExpandAnim()
+                    } else {
+                        startShrinkAnim()
+
+                    }
+
+                    downX = 0F
+                    downY = 0F
+                    offsetX = 0F
+                    isEffectOperation = false
+
+
+//                    resetInitValueFunc(pointA)
+//                    resetInitValueFunc(pointB)
+//                    resetInitValueFunc(pointC)
+//                    getPointDCoordinate(pointB, pointC)
+//                    resetInitValueFunc(pointE)
+//                    resetInitValueFunc(pointF)
+//                    resetInitValueFunc(pointG)
+                }
                 MotionEvent.ACTION_MOVE -> {
-
+                    if (isEffectOperation == false) {
+                        return super.onTouchEvent(event)
+                    }
                     offsetX = it.x - downX
-
                     executePointFunc(pointA, offsetX)
                     executePointFunc(pointB, offsetX)
                     executePointFunc(pointC, offsetX)
                     getPointDCoordinate(pointB, pointC)
-                    Log.i("pengyeah", "pointB==>" + pointB.toString())
-                    Log.i("pengyeah", "pointC==>" + pointC.toString())
-                    Log.i("pengyeah", "pointD==>" + pointD.toString())
+//                    Log.i("pengyeah", "pointB==>" + pointB.toString())
+//                    Log.i("pengyeah", "pointC==>" + pointC.toString())
+//                    Log.i("pengyeah", "pointD==>" + pointD.toString())
                     executePointFunc(pointE, offsetX)
                     executePointFunc(pointF, offsetX)
                     executePointFunc(pointG, offsetX)
+
+                    listener?.onStateChanged(STATE_MOVING)
 
                     postInvalidate()
                 }
                 MotionEvent.ACTION_DOWN -> {
                     downX = it.x
                     downY = it.y
-
-                    postInvalidate()
+                    if (isInWavePathRegion(downX, downY)) {
+                        isEffectOperation = true
+                        postInvalidate()
+                    } else {
+                        //向下传递
+                        return super.onTouchEvent(event)
+                    }
                 }
             }
 
         }
         return true
+    }
+
+    var listener: OnStateChangedListener? = null
+
+    interface OnStateChangedListener {
+        fun onStateChanged(state: Int)
+    }
+
+    fun setOnStateChangedListener(listener: OnStateChangedListener) {
+        this.listener = listener
+    }
+
+    fun showWithAnim() {
+        animation?.cancel()
+        val showAnim = TranslateAnimation(oriWaveHeight, 0F, 0F, 0F)
+        showAnim.duration = 500L
+        showAnim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+            }
+
+        })
+        startAnimation(showAnim)
+        visibility = View.VISIBLE
+    }
+
+    fun hideWithAnim() {
+        animation?.cancel()
+        translationX = 0F
+        val hideAnim = TranslateAnimation(0F, oriWaveHeight, 0F, 0F)
+        hideAnim.duration = 500L
+        hideAnim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                visibility = View.GONE
+                translationX = 0F
+            }
+
+        })
+        startAnimation(hideAnim)
+        visibility = View.VISIBLE
     }
 }

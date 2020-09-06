@@ -12,7 +12,7 @@ class Func5 : BaseFuncImpl {
     constructor(initValue: Float, inParamMax: Float) : super(initValue, inParamMax)
 
     override fun execute(offset: Float): Float {
-        Log.i("pengyeah", "initValue + offset==>" + (initValue + offset))
+//        Log.i("pengyeah", "initValue + offset==>" + (initValue + offset))
         if (initValue + offset > inParamMax) {
             return inParamMax
         } else if (initValue + offset <= 0) {

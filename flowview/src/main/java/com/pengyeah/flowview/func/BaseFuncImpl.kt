@@ -7,21 +7,27 @@ package com.pengyeah.flowview.func
  */
 open class BaseFuncImpl : IFunc {
 
+    
+    override var outParamMax: Float = 0F
+    override var outParamMin: Float = 0F
+
+
+    override var inParamMin: Float = 0F
+    override var initValue: Float
+    override var inParamMax: Float
+
 
     constructor(initValue: Float, inParamMax: Float) {
         this.initValue = initValue
         this.inParamMax = inParamMax
     }
 
-    override var initValue: Float
-    override var inParamMax: Float
-
     override fun execute(inParam: Float): Float {
         return 0F
     }
 
     override fun toString(): String {
-        return "BaseFuncImpl(initValue=$initValue, inParamMax=$inParamMax)"
+        return "BaseFuncImpl(initValue=$initValue, inParamMax=$inParamMax, inParamMin=$inParamMin)"
     }
 
 
