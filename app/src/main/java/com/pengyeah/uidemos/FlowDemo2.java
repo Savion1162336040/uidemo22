@@ -26,8 +26,8 @@ public class FlowDemo2 extends AppCompatActivity {
         fv1 = findViewById(R.id.fv1);
         fv2 = findViewById(R.id.fv2);
 
-        fv1.setImageResource(R.mipmap.app_guide1);
-        fv2.setImageResource(R.mipmap.app_guide2);
+        fv1.setImageResource(R.mipmap.guide1);
+        fv2.setImageResource(R.mipmap.guide2);
 
         fv1.setOnStateChangedListener(new FlowSurfaceView.OnStateChangedListener() {
             @Override
@@ -60,7 +60,7 @@ public class FlowDemo2 extends AppCompatActivity {
         });
 
         fgv = findViewById(R.id.fgv);
-        fgv.addGuides(R.mipmap.png_app_guide1, R.mipmap.png_app_guide2);
+        fgv.addGuides(R.mipmap.guide1, R.mipmap.guide2);
 //        fgv.addGuides(R.mipmap.png_app_guide1);
     }
 }

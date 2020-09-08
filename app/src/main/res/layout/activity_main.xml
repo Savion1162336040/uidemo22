@@ -59,6 +59,13 @@
                 android:layout_height="wrap_content"
                 android:text="像素电子时钟" />
 
+            <Button
+                android:id="@+id/btn8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:text="今日头条loading" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

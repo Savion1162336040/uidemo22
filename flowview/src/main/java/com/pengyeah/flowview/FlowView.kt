@@ -8,6 +8,7 @@ import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.graphics.Paint.FILTER_BITMAP_FLAG
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -17,6 +18,7 @@ import android.view.animation.TranslateAnimation
 import androidx.annotation.ColorInt
 import com.pengyeah.flowview.coordinate.Coordinate
 import com.pengyeah.flowview.func.*
+import com.pengyeah.flowview.utils.BitmapUtils
 
 
 /**
@@ -87,7 +89,6 @@ class FlowView : View {
         drawSrcBm(canvas)
         drawIndicator(canvas)
 
-        invalidate()
     }
 
     private fun drawSrcBm(canvas: Canvas?) {
@@ -117,8 +118,22 @@ class FlowView : View {
         tempCanvas?.drawBitmap(srcBm!!, Rect(0, 0, srcBm?.width!!, srcBm?.height!!), Rect(0, 0, width, height), paint)
     }
 
-    private fun drawIndicator(canvas: Canvas?) {
+    var backBm: Bitmap? = null
+    var isNeedDrawBackBm: Boolean = true
 
+    private fun drawIndicator(canvas: Canvas?) {
+        if (isNeedDrawBackBm == false) {
+            return
+        }
+        canvas?.apply {
+            if (backBm == null) {
+                backBm = BitmapFactory.decodeResource(resources, R.drawable.img_back)
+                backBm?.setHasAlpha(true)
+            }
+            val backBmCenterX: Int = (width - oriWaveHeight / 2).toInt()
+            val backBmCenterY: Int = height / 2
+            this.drawBitmap(backBm!!, Rect(0, 0, backBm!!.width, backBm!!.height), Rect(backBmCenterX - (oriWaveHeight / 8).toInt(), backBmCenterY - (oriWaveHeight / 8).toInt(), backBmCenterX + (oriWaveHeight / 8).toInt(), backBmCenterY + (oriWaveHeight / 8).toInt()), null)
+        }
     }
 
     private fun drawWave(canvas: Canvas?) {
@@ -239,6 +254,7 @@ class FlowView : View {
     var offsetAnimator: ValueAnimator? = null
 
     fun startExpandAnim() {
+        isNeedDrawBackBm = false
         offsetAnimator?.cancel()
         offsetAnimator = ValueAnimator.ofFloat(offsetX, -width.toFloat())
         offsetAnimator?.let {
@@ -304,6 +320,8 @@ class FlowView : View {
             it.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     super.onAnimationEnd(animation)
+
+                    isNeedDrawBackBm = true
 
                     //重新设置变换函数
                     configExpandFunc()
@@ -448,7 +466,6 @@ class FlowView : View {
                         startExpandAnim()
                     } else {
                         startShrinkAnim()
-
                     }
 
                     downX = 0F
@@ -469,6 +486,7 @@ class FlowView : View {
                     if (isEffectOperation == false) {
                         return super.onTouchEvent(event)
                     }
+                    isNeedDrawBackBm = false
                     offsetX = it.x - downX
                     executePointFunc(pointA, offsetX)
                     executePointFunc(pointB, offsetX)

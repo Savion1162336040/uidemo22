@@ -75,6 +75,9 @@ class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
 
     var canvas: Canvas? = null
 
+    var backBm: Bitmap? = null
+    var isNeedDrawBackBm: Boolean = true
+
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
         initView(context, attrs)
@@ -185,6 +188,7 @@ class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
                     if (isEffectOperation == false) {
                         return super.onTouchEvent(event)
                     }
+                    isNeedDrawBackBm = false
                     offsetX = it.x - downX
                     executePointFunc(pointA, offsetX)
                     executePointFunc(pointB, offsetX)
@@ -221,6 +225,7 @@ class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
     var offsetAnimator: ValueAnimator? = null
 
     fun startExpandAnim() {
+        isNeedDrawBackBm = false
         offsetAnimator?.cancel()
         offsetAnimator = ValueAnimator.ofFloat(offsetX, -width.toFloat())
         offsetAnimator?.let {
@@ -286,7 +291,7 @@ class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
             it.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     super.onAnimationEnd(animation)
-
+                    isNeedDrawBackBm = true
                     //重新设置变换函数
                     configExpandFunc()
 
@@ -552,7 +557,18 @@ class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
     }
 
     private fun drawIndicator(canvas: Canvas?) {
-
+        if (isNeedDrawBackBm == false) {
+            return
+        }
+        canvas?.apply {
+            if (backBm == null) {
+                backBm = BitmapFactory.decodeResource(resources, R.drawable.img_back)
+                backBm?.setHasAlpha(true)
+            }
+            val backBmCenterX: Int = (width - oriWaveHeight / 2).toInt()
+            val backBmCenterY: Int = height / 2
+            this.drawBitmap(backBm!!, Rect(0, 0, backBm!!.width, backBm!!.height), Rect(backBmCenterX - (oriWaveHeight / 8).toInt(), backBmCenterY - (oriWaveHeight / 8).toInt(), backBmCenterX + (oriWaveHeight / 8).toInt(), backBmCenterY + (oriWaveHeight / 8).toInt()), null)
+        }
     }
 
     private fun drawSrcBm(canvas: Canvas?) {
