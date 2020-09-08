@@ -6,10 +6,7 @@ import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.RelativeLayout
-import androidx.annotation.DrawableRes
 
 class FlowGuideView : RelativeLayout {
 
@@ -33,12 +30,12 @@ class FlowGuideView : RelativeLayout {
         resIds.iterator().forEach {
             val flowView = FlowView(context)
             views.add(flowView)
-
+//            flowSurfaceView.setBackgroundColor(Color.WHITE)
             flowView.setImageResource(it)
             val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             flowView.layoutParams = layoutParams
             flowView.visibility = View.VISIBLE
-            flowView.scaleType = ImageView.ScaleType.FIT_XY
+//            flowView.scaleType = ImageView.ScaleType.FIT_XY
             flowView.setOnStateChangedListener(object : FlowView.OnStateChangedListener {
                 override fun onStateChanged(state: Int) {
                     if (state == STATE_EXPANDED) {

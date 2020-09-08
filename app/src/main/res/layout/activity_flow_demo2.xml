@@ -6,27 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".FlowDemo2">
 
-    <com.pengyeah.flowview.FlowView
+    <com.pengyeah.flowview.FlowSurfaceView
         android:id="@+id/fv1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipChildren="true"
-        android:clipToPadding="true"
         android:scaleType="fitXY"
         android:src="@mipmap/app_guide1"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
-    <com.pengyeah.flowview.FlowView
+    <com.pengyeah.flowview.FlowSurfaceView
         android:id="@+id/fv2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
         android:src="@mipmap/app_guide2"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
     <com.pengyeah.flowview.FlowGuideView
         android:id="@+id/fgv"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

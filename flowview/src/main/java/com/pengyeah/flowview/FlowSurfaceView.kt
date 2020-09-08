@@ -5,10 +5,11 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
-import android.graphics.Paint.ANTI_ALIAS_FLAG
-import android.graphics.Paint.FILTER_BITMAP_FLAG
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
+import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
@@ -18,16 +19,14 @@ import androidx.annotation.ColorInt
 import com.pengyeah.flowview.coordinate.Coordinate
 import com.pengyeah.flowview.func.*
 
-
 /**
- *  Created by pupu on 2020/9/1
+ *  Created by pupu on 2020/9/8
  *  佛祖开光，永无bug
  *  God bless U
  */
+class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
 
-class FlowView : View {
-
-    val TAG: String? = FlowView::class.simpleName
+    val TAG: String? = FlowSurfaceView::class.simpleName
 
     /**
      * 浪高
@@ -67,70 +66,45 @@ class FlowView : View {
      */
     var waveLineHeight: Float = 0F
 
+    /**
+     * 是否正在绘制
+     */
+    var isDrawing: Boolean = false
+
+    var srcBm: Bitmap? = null
+
+    var canvas: Canvas? = null
+
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
         initView(context, attrs)
     }
-
 
     fun initView(context: Context?, attrs: AttributeSet?) {
         paint.style = Paint.Style.FILL
         paint.isAntiAlias = true
 //        paint.color = color
 //        paint.strokeWidth = 10F
+        holder.addCallback(this)
+        setZOrderOnTop(true)
+        holder.setFormat(PixelFormat.TRANSLUCENT)
 
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        drawWave(canvas)
-        drawSrcBm(canvas)
-        drawIndicator(canvas)
-
-        invalidate()
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
     }
 
-    private fun drawSrcBm(canvas: Canvas?) {
-        canvas?.let {
-            if (srcBm == null) {
-                return
-            }
-            clipSrcBm()
-            it.drawBitmap(tempBm!!, 0F, 0F, null)
-        }
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {
+        Log.i("pengyeah==>","surfaceDestroyed$this")
+        isDrawing = false
     }
 
-    var tempCanvas: Canvas? = null
-    var tempBm: Bitmap? = null
-
-    private fun clipSrcBm() {
-        paint.xfermode = null
-        if (tempBm == null) {
-            tempBm = Bitmap.createBitmap(srcBm?.width!!, srcBm?.height!!, Bitmap.Config.ARGB_8888)
-        }
-        if (tempCanvas == null) {
-            tempCanvas = Canvas(tempBm!!)
-        }
-        tempCanvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-        tempCanvas?.drawPath(path, paint)
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        tempCanvas?.drawBitmap(srcBm!!, Rect(0, 0, srcBm?.width!!, srcBm?.height!!), Rect(0, 0, width, height), paint)
+    override fun surfaceCreated(holder: SurfaceHolder?) {
+        Log.i("pengyeah==>","surfaceCreated$this")
+        isDrawing = true
+        Thread(this).start()
     }
 
-    private fun drawIndicator(canvas: Canvas?) {
-
-    }
-
-    private fun drawWave(canvas: Canvas?) {
-        canvas?.let {
-            configPath()
-//            it.drawPath(path, paint)
-//            it.drawPaint(paint)
-            it.drawFilter = PaintFlagsDrawFilter(0, FILTER_BITMAP_FLAG or ANTI_ALIAS_FLAG)
-//            it.clipPath(path,Region.Op.INTERSECT)
-//            it.clipPath(path)
-        }
-    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -173,67 +147,75 @@ class FlowView : View {
         configExpandFunc()
     }
 
-    private fun configPath(): Path {
+    var downX: Float = 0F
+    var downY: Float = 0F
+    var offsetX: Float = 0F
+    // 判断某次操作是否有效，用于将事件向下传递
+    var isEffectOperation: Boolean = false
 
-        path.reset()
-        path.moveTo(width.toFloat(), 0F)
-        path.lineTo(pointA.x, 0F)
-        path.lineTo(pointA.x, pointA.y)
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let {
+            when (it.action) {
+                MotionEvent.ACTION_UP -> {
+                    if (isEffectOperation == false) {
+                        return super.onTouchEvent(event)
+                    }
+                    if (!isExpanded) {
+                        startExpandAnim()
+                    } else {
+                        startShrinkAnim()
 
-        path.quadTo(pointB.x, pointB.y, pointC.x, pointC.y)
-        path.quadTo(pointD.x, pointD.y, pointE.x, pointE.y)
-        path.quadTo(pointF.x, pointF.y, pointG.x, pointG.y)
+                    }
 
-//        path.lineTo(pointB.x, pointB.y)
-//        path.lineTo(pointC.x, pointC.y)
-//        path.lineTo(pointD.x, pointD.y)
-//        path.lineTo(pointE.x, pointE.y)
-//        path.lineTo(pointF.x, pointF.y)
+                    downX = 0F
+                    downY = 0F
+                    offsetX = 0F
+                    isEffectOperation = false
 
-        path.lineTo(pointG.x, pointG.y)
-        path.lineTo(pointG.x, height.toFloat())
-        path.lineTo(width.toFloat(), height.toFloat())
 
-//        path.addCircle(pointA.x, pointA.y, 10F, Path.Direction.CW)
-//        path.addCircle(pointB.x, pointB.y, 10F, Path.Direction.CW)
-//        path.addCircle(pointC.x, pointC.y, 10F, Path.Direction.CW)
-//        path.addCircle(pointD.x, pointD.y, 10F, Path.Direction.CW)
-//        path.addCircle(pointE.x, pointE.y, 10F, Path.Direction.CW)
-//        path.addCircle(pointF.x, pointF.y, 10F, Path.Direction.CW)
-//        path.addCircle(pointG.x, pointG.y, 10F, Path.Direction.CW)
+//                    resetInitValueFunc(pointA)
+//                    resetInitValueFunc(pointB)
+//                    resetInitValueFunc(pointC)
+//                    getPointDCoordinate(pointB, pointC)
+//                    resetInitValueFunc(pointE)
+//                    resetInitValueFunc(pointF)
+//                    resetInitValueFunc(pointG)
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (isEffectOperation == false) {
+                        return super.onTouchEvent(event)
+                    }
+                    offsetX = it.x - downX
+                    executePointFunc(pointA, offsetX)
+                    executePointFunc(pointB, offsetX)
+                    executePointFunc(pointC, offsetX)
+                    getPointDCoordinate(pointB, pointC)
+//                    Log.i("pengyeah", "pointB==>" + pointB.toString())
+//                    Log.i("pengyeah", "pointC==>" + pointC.toString())
+//                    Log.i("pengyeah", "pointD==>" + pointD.toString())
+                    executePointFunc(pointE, offsetX)
+                    executePointFunc(pointF, offsetX)
+                    executePointFunc(pointG, offsetX)
 
-        path.close()
+                    listener?.onStateChanged(STATE_MOVING)
 
-        return path
-    }
+                    postInvalidate()
+                }
+                MotionEvent.ACTION_DOWN -> {
+                    downX = it.x
+                    downY = it.y
+                    if (isInWavePathRegion(downX, downY)) {
+                        isEffectOperation = true
+                        postInvalidate()
+                    } else {
+                        //向下传递
+                        return super.onTouchEvent(event)
+                    }
+                }
+            }
 
-    fun getPointDCoordinate(pointB: Coordinate, pointC: Coordinate): Coordinate {
-        val dy = pointC.y - pointB.y
-        val dx = pointB.x - pointC.x
-        //B点到D点的距离
-        val tempDy = waveLineHeight - pointB.y
-        pointD.x = pointB.x - (dx * tempDy / dy)
-        pointD.y = waveLineHeight
-        return pointD
-    }
-
-    private fun executePointFunc(point: Coordinate, offset: Float) {
-        point.xFunc?.let {
-            point.x = it.execute(offset)
         }
-        point.yFunc?.let {
-            point.y = it.execute(offset)
-        }
-    }
-
-    private fun resetInitValueFunc(point: Coordinate) {
-        point.xFunc?.let {
-            it.initValue = point.x
-        }
-
-        point.yFunc?.let {
-            it.initValue = point.y
-        }
+        return true
     }
 
     var offsetAnimator: ValueAnimator? = null
@@ -321,6 +303,76 @@ class FlowView : View {
         }
         isExpanded = false
         listener?.onStateChanged(STATE_SHRINKED)
+    }
+
+    fun showWithAnim() {
+        animation?.cancel()
+        val showAnim = TranslateAnimation(oriWaveHeight, 0F, 0F, 0F)
+        showAnim.duration = 500L
+        showAnim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+            }
+
+        })
+        startAnimation(showAnim)
+        visibility = View.VISIBLE
+    }
+
+    fun hideWithAnim() {
+        animation?.cancel()
+        translationX = 0F
+        val hideAnim = TranslateAnimation(0F, oriWaveHeight, 0F, 0F)
+        hideAnim.duration = 500L
+        hideAnim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                visibility = View.GONE
+                translationX = 0F
+            }
+
+        })
+        startAnimation(hideAnim)
+        visibility = View.VISIBLE
+    }
+
+    private fun resetInitValueFunc(point: Coordinate) {
+        point.xFunc?.let {
+            it.initValue = point.x
+        }
+
+        point.yFunc?.let {
+            it.initValue = point.y
+        }
+    }
+
+    var listener: OnStateChangedListener? = null
+
+    interface OnStateChangedListener {
+        fun onStateChanged(state: Int)
+    }
+
+    fun setOnStateChangedListener(listener: OnStateChangedListener) {
+        this.listener = listener
+    }
+
+    private fun executePointFunc(point: Coordinate, offset: Float) {
+        point.xFunc?.let {
+            point.x = it.execute(offset)
+        }
+        point.yFunc?.let {
+            point.y = it.execute(offset)
+        }
     }
 
     fun configExpandFunc() {
@@ -420,7 +472,7 @@ class FlowView : View {
         pointG.yFunc = pointGyFunc
     }
 
-    fun isInWavePathRegion(x: Float, y: Float): Boolean {
+    private fun isInWavePathRegion(x: Float, y: Float): Boolean {
         val rectF = RectF()
         path.computeBounds(rectF, true)
         val region = Region()
@@ -431,130 +483,104 @@ class FlowView : View {
         return false
     }
 
-    var downX: Float = 0F
-    var downY: Float = 0F
-    var offsetX: Float = 0F
-    // 判断某次操作是否有效，用于将事件向下传递
-    var isEffectOperation: Boolean = false
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        event?.let {
-            when (it.action) {
-                MotionEvent.ACTION_UP -> {
-                    if (isEffectOperation == false) {
-                        return super.onTouchEvent(event)
-                    }
-                    if (!isExpanded) {
-                        startExpandAnim()
-                    } else {
-                        startShrinkAnim()
-
-                    }
-
-                    downX = 0F
-                    downY = 0F
-                    offsetX = 0F
-                    isEffectOperation = false
-
-
-//                    resetInitValueFunc(pointA)
-//                    resetInitValueFunc(pointB)
-//                    resetInitValueFunc(pointC)
-//                    getPointDCoordinate(pointB, pointC)
-//                    resetInitValueFunc(pointE)
-//                    resetInitValueFunc(pointF)
-//                    resetInitValueFunc(pointG)
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (isEffectOperation == false) {
-                        return super.onTouchEvent(event)
-                    }
-                    offsetX = it.x - downX
-                    executePointFunc(pointA, offsetX)
-                    executePointFunc(pointB, offsetX)
-                    executePointFunc(pointC, offsetX)
-                    getPointDCoordinate(pointB, pointC)
-//                    Log.i("pengyeah", "pointB==>" + pointB.toString())
-//                    Log.i("pengyeah", "pointC==>" + pointC.toString())
-//                    Log.i("pengyeah", "pointD==>" + pointD.toString())
-                    executePointFunc(pointE, offsetX)
-                    executePointFunc(pointF, offsetX)
-                    executePointFunc(pointG, offsetX)
-
-                    listener?.onStateChanged(STATE_MOVING)
-
-                    postInvalidate()
-                }
-                MotionEvent.ACTION_DOWN -> {
-                    downX = it.x
-                    downY = it.y
-                    if (isInWavePathRegion(downX, downY)) {
-                        isEffectOperation = true
-                        postInvalidate()
-                    } else {
-                        //向下传递
-                        return super.onTouchEvent(event)
-                    }
-                }
+    override fun run() {
+        while (isDrawing) {
+            canvas = holder.lockCanvas()
+            canvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            drawWave(canvas)
+            drawSrcBm(canvas)
+            drawIndicator(canvas)
+            canvas?.apply {
+                holder.unlockCanvasAndPost(this)
             }
-
         }
-        return true
     }
 
-    var listener: OnStateChangedListener? = null
-
-    interface OnStateChangedListener {
-        fun onStateChanged(state: Int)
+    fun getPointDCoordinate(pointB: Coordinate, pointC: Coordinate): Coordinate {
+        val dy = pointC.y - pointB.y
+        val dx = pointB.x - pointC.x
+        //B点到D点的距离
+        val tempDy = waveLineHeight - pointB.y
+        pointD.x = pointB.x - (dx * tempDy / dy)
+        pointD.y = waveLineHeight
+        return pointD
     }
 
-    fun setOnStateChangedListener(listener: OnStateChangedListener) {
-        this.listener = listener
+    private fun drawWave(canvas: Canvas?) {
+        canvas?.let {
+            configPath()
+//            it.drawPath(path, paint)
+//            it.drawPaint(paint)
+            it.drawFilter = PaintFlagsDrawFilter(0, Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+//            it.clipPath(path,Region.Op.INTERSECT)
+//            it.clipPath(path)
+        }
     }
 
-    fun showWithAnim() {
-        animation?.cancel()
-        val showAnim = TranslateAnimation(oriWaveHeight, 0F, 0F, 0F)
-        showAnim.duration = 500L
-        showAnim.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationRepeat(animation: Animation?) {
-            }
+    private fun configPath(): Path {
 
-            override fun onAnimationEnd(animation: Animation?) {
-            }
+        path.reset()
+        path.moveTo(width.toFloat(), 0F)
+        path.lineTo(pointA.x, 0F)
+        path.lineTo(pointA.x, pointA.y)
 
-            override fun onAnimationStart(animation: Animation?) {
-            }
+        path.quadTo(pointB.x, pointB.y, pointC.x, pointC.y)
+        path.quadTo(pointD.x, pointD.y, pointE.x, pointE.y)
+        path.quadTo(pointF.x, pointF.y, pointG.x, pointG.y)
 
-        })
-        startAnimation(showAnim)
-        visibility = View.VISIBLE
+//        path.lineTo(pointB.x, pointB.y)
+//        path.lineTo(pointC.x, pointC.y)
+//        path.lineTo(pointD.x, pointD.y)
+//        path.lineTo(pointE.x, pointE.y)
+//        path.lineTo(pointF.x, pointF.y)
+
+        path.lineTo(pointG.x, pointG.y)
+        path.lineTo(pointG.x, height.toFloat())
+        path.lineTo(width.toFloat(), height.toFloat())
+
+//        path.addCircle(pointA.x, pointA.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointB.x, pointB.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointC.x, pointC.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointD.x, pointD.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointE.x, pointE.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointF.x, pointF.y, 10F, Path.Direction.CW)
+//        path.addCircle(pointG.x, pointG.y, 10F, Path.Direction.CW)
+
+        path.close()
+
+        return path
     }
 
-    fun hideWithAnim() {
-        animation?.cancel()
-        translationX = 0F
-        val hideAnim = TranslateAnimation(0F, oriWaveHeight, 0F, 0F)
-        hideAnim.duration = 500L
-        hideAnim.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationRepeat(animation: Animation?) {
-            }
+    private fun drawIndicator(canvas: Canvas?) {
 
-            override fun onAnimationStart(animation: Animation?) {
-            }
-
-            override fun onAnimationEnd(animation: Animation?) {
-                visibility = View.GONE
-                translationX = 0F
-            }
-
-        })
-        startAnimation(hideAnim)
-        visibility = View.VISIBLE
     }
 
+    private fun drawSrcBm(canvas: Canvas?) {
+        canvas?.let {
+            if (srcBm == null) {
+                return
+            }
+            clipSrcBm()
+            it.drawBitmap(tempBm!!, 0F, 0F, null)
+        }
+    }
 
-    var srcBm: Bitmap? = null
+    var tempCanvas: Canvas? = null
+    var tempBm: Bitmap? = null
+
+    private fun clipSrcBm() {
+        paint.xfermode = null
+        if (tempBm == null) {
+            tempBm = Bitmap.createBitmap(srcBm?.width!!, srcBm?.height!!, Bitmap.Config.ARGB_8888)
+        }
+        if (tempCanvas == null) {
+            tempCanvas = Canvas(tempBm!!)
+        }
+        tempCanvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+        tempCanvas?.drawPath(path, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        tempCanvas?.drawBitmap(srcBm!!, Rect(0, 0, srcBm?.width!!, srcBm?.height!!), Rect(0, 0, width, height), paint)
+    }
 
     fun setImageResource(resId: Int) {
         srcBm = BitmapFactory.decodeResource(resources, resId)
