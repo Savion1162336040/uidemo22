@@ -41,6 +41,17 @@ public class FlowDemo extends AppCompatActivity {
 
         seekBar = findViewById(R.id.seekBar);
 
+        final ToutiaoLoading2 toutiaoLoading3 = new ToutiaoLoading2();
+        toutiaoLoading3.configABaABaFunc();
+        ((ImageView)findViewById(R.id.ivABa)).setImageDrawable(toutiaoLoading3);
+
+        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toutiaoLoading2.startAnim();
+            }
+        });
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -62,14 +73,9 @@ public class FlowDemo extends AppCompatActivity {
 
                     }
                 });
+                toutiaoLoading3.configABaABaFunc();
+                toutiaoLoading3.startAnim();
             }
         }, 1000l);
-
-        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toutiaoLoading2.startAnim();
-            }
-        });
     }
 }

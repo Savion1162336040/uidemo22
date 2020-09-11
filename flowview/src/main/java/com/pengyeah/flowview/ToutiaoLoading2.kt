@@ -38,7 +38,6 @@ class ToutiaoLoading2 : Drawable {
         mPath.lineTo(pointC.x, pointC.y)
         mPath.lineTo(pointD.x, pointD.y)
         mPath.close()
-
         canvas.drawPath(mPath, mPaint)
     }
 
@@ -58,10 +57,30 @@ class ToutiaoLoading2 : Drawable {
         pointD.y = bounds.bottom - 2 * mPaint.strokeWidth
 
         //初始化变化函数
+        configFunc()
+    }
+
+    fun configABaABaFunc() {
+        pointA.yFunc = Func1(pointA.y, bounds.height() - 4 * mPaint.strokeWidth)
+        pointB.yFunc = Func1(pointB.y, bounds.height() - 4 * mPaint.strokeWidth)
+        pointC.yFunc = Func3(pointC.y, bounds.height() - 4 * mPaint.strokeWidth)
+        pointD.yFunc = Func3(pointD.y, bounds.height() - 4 * mPaint.strokeWidth)
+    }
+
+    fun configToutiaoFunc() {
+//        pointA.xFunc = Func1(pointA.x, bounds.height() - 4 * mPaint.strokeWidth)
+//        pointB.xFunc = Func2(pointB.x, bounds.height() - 4 * mPaint.strokeWidth)
+//        pointC.xFunc = Func3(pointC.x, bounds.height() - 4 * mPaint.strokeWidth)
+//        pointD.xFunc = Func4(pointD.x, bounds.height() - 4 * mPaint.strokeWidth)
+
         pointA.yFunc = Func1(pointA.y, bounds.height() - 4 * mPaint.strokeWidth)
         pointB.yFunc = Func2(pointB.y, bounds.height() - 4 * mPaint.strokeWidth)
         pointC.yFunc = Func3(pointC.y, bounds.height() - 4 * mPaint.strokeWidth)
         pointD.yFunc = Func4(pointD.y, bounds.height() - 4 * mPaint.strokeWidth)
+    }
+
+    fun configFunc() {
+        configToutiaoFunc()
     }
 
     override fun setAlpha(alpha: Int) {
@@ -74,7 +93,20 @@ class ToutiaoLoading2 : Drawable {
     override fun setColorFilter(colorFilter: ColorFilter?) {
     }
 
-    fun transform(offset: Int) {
+    fun transform(offset: Float) {
+        pointA.xFunc?.let {
+            pointA.x = it.execute(offset.toFloat())
+        }
+        pointB.xFunc?.let {
+            pointB.x = it.execute(offset.toFloat())
+        }
+        pointC.xFunc?.let {
+            pointC.x = it.execute(offset.toFloat())
+        }
+        pointD.xFunc?.let {
+            pointD.x = it.execute(offset.toFloat())
+        }
+
         pointA.yFunc?.let {
             pointA.y = it.execute(offset.toFloat())
         }
@@ -98,19 +130,7 @@ class ToutiaoLoading2 : Drawable {
         animator?.duration = 800L
         animator?.addUpdateListener {
             val offset: Float = it.animatedValue as Float
-            pointA.yFunc?.let {
-                pointA.y = it.execute(offset.toFloat())
-            }
-            pointB.yFunc?.let {
-                pointB.y = it.execute(offset.toFloat())
-            }
-            pointC.yFunc?.let {
-                pointC.y = it.execute(offset.toFloat())
-            }
-            pointD.yFunc?.let {
-                pointD.y = it.execute(offset.toFloat())
-            }
-            invalidateSelf()
+            transform(offset)
         }
         animator?.reverse()
         animator?.repeatCount = -1

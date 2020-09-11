@@ -15,7 +15,9 @@
         <activity
             android:name=".ElecTimeViewDemo"
             android:screenOrientation="landscape" />
-        <activity android:name=".FlowDemo" />
+        <activity
+            android:name=".FlowDemo"
+            android:screenOrientation="portrait" />
         <activity android:name=".SmaritisanDemo" />
         <activity android:name=".LevelSelectViewDemo" />
         <activity android:name=".RulerViewDemo" />

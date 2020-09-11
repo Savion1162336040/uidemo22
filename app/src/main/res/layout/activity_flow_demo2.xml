@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <com.pengyeah.flowview.FlowSurfaceView
         android:id="@+id/fv2"
@@ -22,7 +22,7 @@
 
     <com.pengyeah.flowview.FlowGuideView
         android:id="@+id/fgv"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
