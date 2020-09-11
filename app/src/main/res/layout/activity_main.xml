@@ -66,6 +66,13 @@
                 android:visibility="visible"
                 android:text="今日头条loading" />
 
+            <Button
+                android:id="@+id/btn9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:text="3DCard" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
