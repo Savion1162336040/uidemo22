@@ -223,13 +223,14 @@ class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
     }
 
     var offsetAnimator: ValueAnimator? = null
+    val DURATION_ANIMATION:Long = 800L
 
     fun startExpandAnim() {
         isNeedDrawBackBm = false
         offsetAnimator?.cancel()
         offsetAnimator = ValueAnimator.ofFloat(offsetX, -width.toFloat())
         offsetAnimator?.let {
-            it.duration = 800L
+            it.duration = DURATION_ANIMATION
             it.interpolator = BounceInterpolator()
             it.addUpdateListener {
                 val tempOffsetX: Float = it.animatedValue as Float
@@ -273,7 +274,7 @@ class FlowSurfaceView : SurfaceView, SurfaceHolder.Callback, Runnable {
         offsetAnimator?.cancel()
         offsetAnimator = ValueAnimator.ofFloat(offsetX, width.toFloat())
         offsetAnimator?.let {
-            it.duration = 800L
+            it.duration = DURATION_ANIMATION
             it.interpolator = AccelerateDecelerateInterpolator()
             it.addUpdateListener {
                 val tempOffsetX: Float = it.animatedValue as Float
