@@ -2,3 +2,4 @@ include ':app', ':switchbutton', ':clockview', ':rulerview', ':levelselectview',
 rootProject.name='uidemos'
 include ':electimeview'
 include ':card3d'
+include ':circular'
