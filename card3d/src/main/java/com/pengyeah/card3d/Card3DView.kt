@@ -6,10 +6,10 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import com.pengyeah.card3d.utils.DisplayUtils
-import com.pupu.card3d.R
+import com.pengyeah.card3d.R
 
 /**
- *  Created by pupu on 2020/9/11
+ *  Created by pengyeah on 2020/9/11
  *  佛祖开光，永无bug
  *  God bless U
  */

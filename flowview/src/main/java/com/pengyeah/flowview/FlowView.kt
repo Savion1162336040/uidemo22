@@ -22,7 +22,7 @@ import com.pengyeah.flowview.utils.BitmapUtils
 
 
 /**
- *  Created by pupu on 2020/9/1
+ *  Created by pengyeah on 2020/9/1
  *  佛祖开光，永无bug
  *  God bless U
  */

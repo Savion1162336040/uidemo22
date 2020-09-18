@@ -35,5 +35,6 @@ dependencies {
     api project(":levelselectview")
     api project(":electimeview")
     api project(":card3d")
+    api project(":circular")
     implementation 'androidx.cardview:cardview:1.0.0'
 }

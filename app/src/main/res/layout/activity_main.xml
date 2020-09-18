@@ -73,6 +73,13 @@
                 android:visibility="gone"
                 android:text="3DCard" />
 
+            <Button
+                android:id="@+id/btn10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:text="无极旋钮" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

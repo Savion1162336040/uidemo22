@@ -5,7 +5,7 @@ import kotlin.math.acos
 import kotlin.math.sqrt
 
 /**
- *  Created by pupu on 2020/9/16
+ *  Created by pengyeah on 2020/9/16
  *  佛祖开光，永无bug
  *  God bless U
  */
@@ -72,8 +72,8 @@ class CircularOpUtils {
             return 0F
         }
         var degree = acos((x - centerX) / distance) * 180 / PI.toFloat()
-        if (y > centerY) {
-            degree = -degree
+        if (y < centerY) {
+            degree = 360 - degree
         }
         return degree
     }

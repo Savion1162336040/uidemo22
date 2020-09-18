@@ -20,7 +20,7 @@ import com.pengyeah.flowview.coordinate.Coordinate
 import com.pengyeah.flowview.func.*
 
 /**
- *  Created by pupu on 2020/9/8
+ *  Created by pengyeah on 2020/9/8
  *  佛祖开光，永无bug
  *  God bless U
  */
