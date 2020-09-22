@@ -136,13 +136,42 @@ class VolDiskView : View {
 
     private fun drawShadow(canvas: Canvas) {
         paint.color = Color.WHITE
-        paint.setShadowLayer(30F, 0F, 15F, Color.GRAY)
+        paint.setShadowLayer(shadowSize, 0F, 15F, Color.GRAY)
         canvas.drawCircle(centerX, centerY, radius, paint)
         paint.clearShadowLayer()
     }
 
     var shrinkScaleAnim: ValueAnimator? = null
     var expandScaleAnim: ValueAnimator? = null
+
+    var shadowAnim: ValueAnimator? = null
+    var shadowSize: Float = 30F
+
+    private fun startDownShadowAnim() {
+        shadowAnim?.cancel()
+        shadowAnim = ValueAnimator.ofFloat(shadowSize, 20F)
+        with(shadowAnim!!) {
+            duration = 300L
+            addUpdateListener {
+                shadowSize = animatedValue as Float
+                postInvalidate()
+            }
+            start()
+        }
+    }
+
+    private fun startUpShadowAnim() {
+        shadowAnim?.cancel()
+        shadowAnim = ValueAnimator.ofFloat(shadowSize, 30F)
+        with(shadowAnim!!) {
+            duration = 300L
+            addUpdateListener {
+                shadowSize = animatedValue as Float
+                postInvalidate()
+            }
+            start()
+        }
+    }
 
     private fun shrinkScaleAnim() {
         shrinkScaleAnim?.cancel()
@@ -171,6 +200,7 @@ class VolDiskView : View {
                     circularOpUtils.resetPreDegree()
                     downX = 0F
                     downY = 0F
+                    startUpShadowAnim()
                 }
                 MotionEvent.ACTION_MOVE -> {
                     circularOpUtils.computeCurAngle(downX, downY, it.x, it.y)
@@ -179,6 +209,7 @@ class VolDiskView : View {
                 MotionEvent.ACTION_DOWN -> {
                     downX = it.x
                     downY = it.y
+                    startDownShadowAnim()
                 }
                 else -> {
                 }
