@@ -21,6 +21,10 @@ class Card3DView : ViewGroup {
 
     var mSrcBm: Bitmap? = null
 
+    var depthZ: Float = 0F
+    var rotateX: Float = 0F
+    var rotateY: Float = 0F
+
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
         initView(context, attrs)
@@ -37,51 +41,78 @@ class Card3DView : ViewGroup {
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         canvas?.let {
-            mCamera.translate(-100F,0F,0F)
 
-            it.save()
+            mMatrix.reset()
             mCamera.save()
-            mCamera.translate(0F, 0F, 300F)
-            mCamera.rotateX(30F)
-            mCamera.applyToCanvas(it)
+            mCamera.translate(0F, 0F, depthZ)
+            mCamera.rotateX(rotateX)
+            mCamera.rotateY(rotateY)
+            mCamera.getMatrix(mMatrix)
             mCamera.restore()
-
+            mMatrix.preTranslate(-width / 2F, -height / 2F)
+            mMatrix.postTranslate(width / 2F, height / 2F)
+            it.concat(mMatrix)
             mPaint.color = Color.GRAY
             it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
-            it.restore()
 
-            it.save()
-            mCamera.save()
-            mCamera.translate(0F, 0F, 200F)
-            mCamera.rotateX(30F)
-            mCamera.applyToCanvas(it)
-            mCamera.restore()
+//            mMatrix.reset()
+//            mCamera.save()
+//            mCamera.translate(0F, 0F, 0F)
+//            mCamera.rotateX(10F)
+//            mCamera.rotateY(10F)
+//            mCamera.getMatrix(mMatrix)
+//            mCamera.restore()
+//            mMatrix.preTranslate(-width / 2F, -height / 2F)
+//            mMatrix.postTranslate(width / 2F, height / 2F)
+//            it.concat(mMatrix)
+//            mPaint.color = Color.RED
+//            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
 
-            mPaint.color = Color.RED
-            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
-            it.restore()
+//            mCamera.translate(-100F,0F,0F)
+//
+//            it.save()
+//            mCamera.save()
+//            mCamera.translate(0F, 0F, 300F)
+//            mCamera.rotateX(30F)
+//            mCamera.applyToCanvas(it)
+//            mCamera.restore()
+//
+//            mPaint.color = Color.GRAY
+//            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
+//            it.restore()
 
-            it.save()
-            mCamera.save()
-            mCamera.translate(0F, 0F, 100F)
-            mCamera.rotateX(30F)
-            mCamera.applyToCanvas(it)
-            mCamera.restore()
-
-            mPaint.color = Color.GRAY
-            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
-            it.restore()
-
-            it.save()
-            mCamera.save()
-            mCamera.translate(0F, 0F, 0F)
-            mCamera.rotateX(30F)
-            mCamera.applyToCanvas(it)
-            mCamera.restore()
-
-            mPaint.color = Color.RED
-            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
-            it.restore()
+//            it.save()
+//            mCamera.save()
+//            mCamera.translate(0F, 0F, 200F)
+//            mCamera.rotateX(30F)
+//            mCamera.applyToCanvas(it)
+//            mCamera.restore()
+//
+//            mPaint.color = Color.RED
+//            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
+//            it.restore()
+//
+//            it.save()
+//            mCamera.save()
+//            mCamera.translate(0F, 0F, 100F)
+//            mCamera.rotateX(30F)
+//            mCamera.applyToCanvas(it)
+//            mCamera.restore()
+//
+//            mPaint.color = Color.GRAY
+//            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
+//            it.restore()
+//
+//            it.save()
+//            mCamera.save()
+//            mCamera.translate(0F, 0F, 0F)
+//            mCamera.rotateX(30F)
+//            mCamera.applyToCanvas(it)
+//            mCamera.restore()
+//
+//            mPaint.color = Color.RED
+//            it.drawRoundRect(RectF(width / 4F, height / 4F, width * 3 / 4F, height * 3 / 4F), 20F, 20F, mPaint)
+//            it.restore()
         }
     }
 
