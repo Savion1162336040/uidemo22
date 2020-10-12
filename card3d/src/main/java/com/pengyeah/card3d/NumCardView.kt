@@ -13,6 +13,7 @@ import com.pengyeah.card3d.func.CardRotateFunc
 import com.pengyeah.card3d.func.CardShadowDistanceFunc
 import com.pengyeah.card3d.func.CardShadowSizeFunc
 import com.pengyeah.flowview.func.IFunc
+import kotlin.math.abs
 
 /**
  *  Created by pengyeah on 2020/10/9
@@ -228,9 +229,14 @@ class NumCardView : View {
         when (state) {
             STATE_NORMAL -> {
                 isNeedDrawMidCard = false
+                isNeedDrawUpCard = true
+                isNeedDrawDownCard = true
             }
             STATE_UP_ING -> {
                 isNeedDrawMidCard = true
+                if (curShowNum + 1 > 9) {
+                    isNeedDrawDownCard = false
+                }
             }
             STATE_DOWN_ING -> {
                 isNeedDrawMidCard = true
@@ -326,16 +332,37 @@ class NumCardView : View {
                     if (curShowNum + 1 <= 9) {
                         tempBm = Bitmap.createBitmap(numBms[curShowNum + 1], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
                     }
-
                 } else if (curState == STATE_DOWN_ING) {
                     //往下翻
-                    tempBm = Bitmap.createBitmap(numBms[curShowNum], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                    if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
+                        //绘制前一个数字
+                        if (curShowNum - 1 >= 0) {
+                            tempBm = Bitmap.createBitmap(numBms[curShowNum - 1], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                        } else {
+                            tempBm = Bitmap.createBitmap(numBms[0], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                        }
+                    } else {
+                        tempBm = Bitmap.createBitmap(numBms[curShowNum], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                    }
                 }
                 tempBm?.let {
                     drawBitmap(it, Rect(0, it.height / 2, it.width, it.height), rectF, mPaint)
                 }
             } else {
-                drawBitmap(curNumBm, Rect(0, curNumBm.height / 2, curNumBm.width, curNumBm.height), rectF, mPaint)
+                if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
+                    //绘制前一个数字
+                    var tempBm: Bitmap? = null
+                    if (curShowNum - 1 >= 0) {
+                        tempBm = numBms[curShowNum - 1]
+                    } else {
+                        tempBm = numBms[curShowNum]
+                    }
+                    tempBm?.let {
+                        drawBitmap(it, Rect(0, it.height / 2, it.width, it.height), rectF, mPaint)
+                    }
+                } else {
+                    drawBitmap(curNumBm, Rect(0, curNumBm.height / 2, curNumBm.width, curNumBm.height), rectF, mPaint)
+                }
             }
 
             restore()
@@ -362,7 +389,15 @@ class NumCardView : View {
             //绘制数字
             mPaint.clearShadowLayer()
             val curNumBm = numBms[curShowNum]
-            drawBitmap(curNumBm, Rect(0, curNumBm.height / 2, curNumBm.width, curNumBm.height), rectF, mPaint)
+            //往上翻，显示下一个数字
+            if (curState == STATE_UP_ING) {
+                var tempBm = numBms[curShowNum + 1]
+                if (curShowNum + 1 <= 9) {
+                    drawBitmap(tempBm, Rect(0, tempBm.height / 2, tempBm.width, tempBm.height), rectF, mPaint)
+                }
+            } else {
+                drawBitmap(curNumBm, Rect(0, curNumBm.height / 2, curNumBm.width, curNumBm.height), rectF, mPaint)
+            }
         }
     }
 
@@ -374,7 +409,7 @@ class NumCardView : View {
     /**
      * 卡片上翻动画
      */
-    private fun startCardUpAnim() {
+    private fun startCardUpAnim(curNum: Int) {
         cardRotateAnim?.cancel()
         cardRotateAnim = ValueAnimator.ofFloat(rotateX, 180F)
         with(cardRotateAnim!!) {
@@ -389,6 +424,7 @@ class NumCardView : View {
                     super.onAnimationEnd(animation)
                     resetInitValue()
                     curState = STATE_NORMAL
+                    curShowNum = curNum
                 }
             })
             start()
@@ -398,7 +434,7 @@ class NumCardView : View {
     /**
      * 卡片下翻动画
      */
-    private fun startCardDownAnim() {
+    private fun startCardDownAnim(curNum: Int) {
         cardRotateAnim?.cancel()
         cardRotateAnim = ValueAnimator.ofFloat(rotateX, 0F)
         with(cardRotateAnim!!) {
@@ -413,6 +449,7 @@ class NumCardView : View {
                     super.onAnimationEnd(animation)
                     resetInitValue()
                     curState = STATE_NORMAL
+                    curShowNum = curNum
                 }
             })
             start()
@@ -451,11 +488,27 @@ class NumCardView : View {
             MotionEvent.ACTION_UP -> {
                 //判断是上翻还是下翻
                 if (rotateX >= 90F) {
-                    //上翻
-                    startCardUpAnim()
+                    if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
+                        if (curShowNum + 1 <= 9) {
+                            startCardUpAnim(curShowNum + 1)
+                        } else {
+                            curShowNum = 9
+                            startCardDownAnim(9)
+                        }
+                    } else {
+                        startCardUpAnim(curShowNum)
+                    }
                 } else {
-                    //下翻
-                    startCardDownAnim()
+                    if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
+                        if (curShowNum - 1 >= 0) {
+                            startCardDownAnim(curShowNum - 1)
+                        } else {
+                            curShowNum = 0
+                            startCardUpAnim(0)
+                        }
+                    } else {
+                        startCardDownAnim(curShowNum)
+                    }
                 }
                 downX = 0F
                 downY = 0F
