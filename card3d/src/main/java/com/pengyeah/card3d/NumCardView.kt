@@ -354,8 +354,6 @@ class NumCardView : View {
                     var tempBm: Bitmap? = null
                     if (curShowNum - 1 >= 0) {
                         tempBm = numBms[curShowNum - 1]
-                    } else {
-                        tempBm = numBms[curShowNum]
                     }
                     tempBm?.let {
                         drawBitmap(it, Rect(0, it.height / 2, it.width, it.height), rectF, mPaint)

@@ -83,7 +83,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="公众号：也说BB \n知乎：彭也 \n掘金：彭也 \n拒绝白嫖，三连一波\n关注他、关注他、关注他~" />
+                android:text="公众号：也说BB \n知乎：彭也 \n掘金：彭也 \n拒绝白嫖，三连一波\n关注他、关注他、关注他~ \n每周六简单维护...大概" />
         </LinearLayout>
     </ScrollView>
 
