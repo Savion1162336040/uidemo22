@@ -19,6 +19,7 @@
             <option value="$PROJECT_DIR$/levelselectview" />
             <option value="$PROJECT_DIR$/rulerview" />
             <option value="$PROJECT_DIR$/switchbutton" />
+            <option value="$PROJECT_DIR$/tear" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

@@ -36,5 +36,6 @@ dependencies {
     api project(":electimeview")
     api project(":card3d")
     api project(":circular")
+    api project(":tear")
     implementation 'androidx.cardview:cardview:1.0.0'
 }

@@ -50,8 +50,8 @@
                 android:id="@+id/btn6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
-                android:text="液体流动" />
+                android:text="液体流动"
+                android:visibility="visible" />
 
             <Button
                 android:id="@+id/btn7"
@@ -63,27 +63,35 @@
                 android:id="@+id/btn8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
-                android:text="今日头条loading" />
+                android:text="今日头条loading"
+                android:visibility="visible" />
 
             <Button
                 android:id="@+id/btn9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
-                android:text="3DCard" />
+                android:text="3DCard"
+                android:visibility="visible" />
 
             <Button
                 android:id="@+id/btn10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
-                android:text="无极旋钮" />
+                android:text="无极旋钮"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btn11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="纸张撕页"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="公众号：也说BB \n知乎：彭也 \n掘金：彭也 \n拒绝白嫖，三连一波\n关注他、关注他、关注他~ \n每周六简单维护...大概" />
+
         </LinearLayout>
     </ScrollView>
 
