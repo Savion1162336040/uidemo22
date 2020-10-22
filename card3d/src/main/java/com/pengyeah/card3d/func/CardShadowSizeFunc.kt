@@ -3,7 +3,7 @@ package com.pengyeah.card3d.func
 import com.pengyeah.flowview.func.BaseFuncImpl
 
 /**
- *  Created by pupu on 2020/10/10
+ *  Created by pengyeah on 2020/10/10
  *  佛祖开光，永无bug
  *  God bless U
  */

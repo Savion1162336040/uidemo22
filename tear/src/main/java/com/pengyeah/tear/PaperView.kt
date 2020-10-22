@@ -5,6 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
 import com.pengyeah.tear.coordinate.Coordinate
 import com.pengyeah.tear.utils.BazierUtils
@@ -16,7 +17,7 @@ import kotlin.math.cos
  *  佛祖开光，永无bug
  *  God bless U
  */
-class PaperView : View {
+class PaperView : RelativeLayout {
 
     val TAG: String = javaClass.simpleName
 
@@ -52,7 +53,18 @@ class PaperView : View {
      */
     var dogEaredPath: Path = Path()
 
-    var crimpSize: Float = 80F
+    /**
+     * 组合路径 = 内容路径+纸张卷角
+     */
+    var unionPath: Path = Path()
+
+    var crimpSize: Float = 100F
+
+    /**
+     * 阴影颜色
+     */
+    @ColorInt
+    var shadowColor: Int = 0x44888888
 
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
@@ -80,7 +92,7 @@ class PaperView : View {
         pointB.x = 0F
         pointB.y = paperHeight / 2F + crimpSize
 
-        pointC.x = 40F
+        pointC.x = crimpSize
         pointC.y = paperHeight / 2F + crimpSize
 
 
@@ -107,18 +119,14 @@ class PaperView : View {
         contentPath.close()
 
         var pointb = Coordinate()
-        var pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.7F)
+        var pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.5F)
         pointb.x = pointbF.x
         pointb.y = pointbF.y
-//        pointb.x = pointA.x + 40F - 40F * Math.sin(45.toDouble()).toFloat()
-//        pointb.y = pointA.y + 34F * Math.sin(45.toDouble()).toFloat()
 
         var pointf = Coordinate()
-        var pointfF = BazierUtils.getBezierPoint(PointF(pointE.x, pointE.y), PointF(pointF.x, pointF.y), PointF(pointG.x, pointG.y), 0.7F)
+        var pointfF = BazierUtils.getBezierPoint(PointF(pointE.x, pointE.y), PointF(pointF.x, pointF.y), PointF(pointG.x, pointG.y), 0.5F)
         pointf.x = pointfF.x
         pointf.y = pointfF.y
-//        pointf.x = pointE.x + 40F - 40F * (Math.cos(45.toDouble())).toFloat()
-//        pointf.y = pointE.y + 40F * (Math.cos(45.toDouble())).toFloat()
 
         dogEaredPath.moveTo(pointb.x, pointb.y)
         dogEaredPath.lineTo(pointD.x, pointD.y)
@@ -130,6 +138,8 @@ class PaperView : View {
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
+
         canvas?.let {
             drawPaper(it)
         }
@@ -137,21 +147,36 @@ class PaperView : View {
 
     private fun drawPaper(canvas: Canvas) {
         with(canvas) {
-            //            drawRect((width - paperWidth) / 2F, (height - paperHeight) / 2F, (width - paperWidth) / 2F + paperWidth, (height - paperHeight) / 2F + paperHeight, mPaint)
             save()
             translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
-            mPaint.style = Paint.Style.STROKE
-            mPaint.color = Color.BLUE
+
+            mPaint.shader = null
+            mPaint.setShadowLayer(50F, -10F, 10F, shadowColor)
+            unionPath.reset()
+            unionPath.op(contentPath, Path.Op.UNION)
+            unionPath.op(dogEaredPath, Path.Op.UNION)
+            drawPath(unionPath, mPaint)
+
+            mPaint.style = Paint.Style.FILL
+            mPaint.color = Color.WHITE
             mPaint.clearShadowLayer()
             drawPath(contentPath, mPaint)
             mPaint.style = Paint.Style.FILL
-            mPaint.color = Color.RED
-            mPaint.setShadowLayer(30F, 10F, -10F, Color.GRAY)
+            mPaint.color = Color.WHITE
+            mPaint.setShadowLayer(20F, 10F, -10F, shadowColor)
             drawPath(dogEaredPath, mPaint)
-            mPaint.setShader(LinearGradient(0F, height.toFloat(), pointD.x, pointD.y, Color.GRAY, Color.WHITE, Shader.TileMode.MIRROR))
+
+            mPaint.shader = LinearGradient(pointD.x / 2F, pointD.y + pointD.x / 2F, pointD.x * 3 / 4F, pointD.y + pointD.x / 4F, shadowColor, Color.WHITE, Shader.TileMode.CLAMP)
             drawPath(dogEaredPath, mPaint)
             restore()
         }
+    }
+
+    override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
+        canvas?.let {
+            it.clipPath(contentPath)
+        }
+        return super.drawChild(canvas, child, drawingTime)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {

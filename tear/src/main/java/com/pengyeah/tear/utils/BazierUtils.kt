@@ -12,7 +12,7 @@ class BazierUtils {
     private constructor()
 
     companion object {
-        fun getBezierPoint(start: PointF, end: PointF, control: PointF, t: Float): PointF {
+        fun getBezierPoint(start: PointF, control: PointF, end: PointF, t: Float): PointF {
             val bezierPoint = PointF()
             bezierPoint.x = (1 - t) * (1 - t) * start.x + 2 * t * (1 - t) * control.x + t * t * end.x
             bezierPoint.y = (1 - t) * (1 - t) * start.y + 2 * t * (1 - t) * control.y + t * t * end.y
