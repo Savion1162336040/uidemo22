@@ -74,6 +74,8 @@ class PaperView : RelativeLayout {
     private fun initView(context: Context?, attrs: AttributeSet?) {
         mPaint.color = paperColor
         mPaint.isAntiAlias = true
+
+        setWillNotDraw(false)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -136,6 +138,10 @@ class PaperView : RelativeLayout {
         dogEaredPath.op(contentPath, Path.Op.DIFFERENCE)
     }
 
+    override fun dispatchDraw(canvas: Canvas?) {
+        super.dispatchDraw(canvas)
+    }
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         setLayerType(LAYER_TYPE_SOFTWARE, null)
@@ -173,10 +179,13 @@ class PaperView : RelativeLayout {
     }
 
     override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
-        canvas?.let {
-            it.clipPath(contentPath)
-        }
-        return super.drawChild(canvas, child, drawingTime)
+        canvas?.save()
+        canvas?.translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
+        canvas?.clipPath(contentPath)
+
+        val flag = super.drawChild(canvas, child, drawingTime)
+        canvas?.restore()
+        return flag
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
