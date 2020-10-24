@@ -3,6 +3,7 @@ package com.pengyeah.tear
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.RelativeLayout
@@ -58,7 +59,7 @@ class PaperView : RelativeLayout {
      */
     var unionPath: Path = Path()
 
-    var crimpSize: Float = 100F
+    var crimpSize: Float = 0F
 
     /**
      * 阴影颜色
@@ -84,32 +85,38 @@ class PaperView : RelativeLayout {
         paperWidth = w * 3 / 4F
         paperHeight = paperWidth
 
-        configPath()
+        configPoint(0F, paperHeight)
+        combinePath()
     }
 
-    private fun configPath() {
+    /**
+     * 根据D点配置各个关键点坐标
+     */
+    private fun configPoint(dx: Float, dy: Float) {
+        pointD.x = dx
+        pointD.y = dy
+
         pointA.x = 0F
-        pointA.y = paperHeight / 2F
+        pointA.y = pointD.y - crimpSize
 
         pointB.x = 0F
-        pointB.y = paperHeight / 2F + crimpSize
+        pointB.y = pointD.y
 
-        pointC.x = crimpSize
-        pointC.y = paperHeight / 2F + crimpSize
+        pointC.x = pointB.x + crimpSize
+        pointC.y = pointD.y
 
-
-        pointE.x = paperWidth / 2F - crimpSize
+        pointE.x = pointD.x
         pointE.y = paperHeight - crimpSize
 
-        pointF.x = paperWidth / 2F - crimpSize
+        pointF.x = pointD.x
         pointF.y = paperHeight
 
-        pointG.x = paperWidth / 2F
+        pointG.x = pointD.x + crimpSize
         pointG.y = paperHeight
+    }
 
-        pointD.x = pointE.x
-        pointD.y = pointC.y
-
+    private fun combinePath() {
+        contentPath.reset()
         contentPath.moveTo(0F, 0F)
         contentPath.lineTo(pointA.x, pointA.y)
         contentPath.quadTo(pointB.x, pointB.y, pointC.x, pointC.y)
@@ -120,16 +127,17 @@ class PaperView : RelativeLayout {
         contentPath.lineTo(paperWidth, 0F)
         contentPath.close()
 
-        var pointb = Coordinate()
-        var pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.5F)
+        val pointb = Coordinate()
+        val pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.5F)
         pointb.x = pointbF.x
         pointb.y = pointbF.y
 
-        var pointf = Coordinate()
-        var pointfF = BazierUtils.getBezierPoint(PointF(pointE.x, pointE.y), PointF(pointF.x, pointF.y), PointF(pointG.x, pointG.y), 0.5F)
+        val pointf = Coordinate()
+        val pointfF = BazierUtils.getBezierPoint(PointF(pointE.x, pointE.y), PointF(pointF.x, pointF.y), PointF(pointG.x, pointG.y), 0.5F)
         pointf.x = pointfF.x
         pointf.y = pointfF.y
 
+        dogEaredPath.reset()
         dogEaredPath.moveTo(pointb.x, pointb.y)
         dogEaredPath.lineTo(pointD.x, pointD.y)
         dogEaredPath.lineTo(pointf.x, pointf.y)
@@ -188,7 +196,31 @@ class PaperView : RelativeLayout {
         return flag
     }
 
+    var downX: Float = 0F
+    var downY: Float = 0F
+    var offset: Float = 0F
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return super.onTouchEvent(event)
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                downX = 0F
+                downY = 0F
+            }
+            MotionEvent.ACTION_MOVE -> {
+                offset = event.x - downX
+                Log.i(TAG,"offset==>$offset")
+                configPoint(offset, paperHeight - offset)
+                combinePath()
+                postInvalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                downX = 0F
+                downY = 0F
+            }
+            else -> {
+
+            }
+        }
+        return true
     }
 }
