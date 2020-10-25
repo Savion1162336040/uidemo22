@@ -1,11 +1,15 @@
 package com.pengyeah.tear
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
 import com.pengyeah.tear.coordinate.Coordinate
@@ -18,7 +22,7 @@ import kotlin.math.abs
  *  佛祖开光，永无bug
  *  God bless U
  */
-class PaperView : RelativeLayout {
+class PaperLayout : RelativeLayout {
 
     val TAG: String = javaClass.simpleName
 
@@ -68,7 +72,7 @@ class PaperView : RelativeLayout {
      * 阴影颜色
      */
     @ColorInt
-    var shadowColor: Int = 0x44888888
+    var shadowColor: Int = Color.parseColor("#ffd5d5d5")
 
     /**
      * 卷角在内状态
@@ -152,16 +156,28 @@ class PaperView : RelativeLayout {
             pointI.x = pointD.x
             pointI.y = pointD.y + paperHeight
 
-            pointA.x = pointH.x
-            pointA.y = -crimpSize
+            pointA.x = pointD.x - paperWidth
+            if (dy <= -paperHeight) {
+                pointA.y = pointD.y - paperHeight
+            } else {
+                pointA.y = -crimpSize
+            }
 
             pointB.x = pointA.x
-            pointB.y = 0F
+            if (dy <= -paperHeight) {
+                pointB.y = pointD.y - paperHeight
+            } else {
+                pointB.y = 0F
+            }
 
             pointC.x = pointB.x + crimpSize
-            pointC.y = 0F
+            pointC.y = pointB.y
 
-            pointE.x = paperWidth
+            if (dx >= 2 * paperWidth) {
+                pointE.x = pointD.x - paperWidth
+            } else {
+                pointE.x = paperWidth
+            }
             pointE.y = paperHeight + pointD.y - crimpSize
 
             pointF.x = pointE.x
@@ -203,38 +219,35 @@ class PaperView : RelativeLayout {
 
             dogEaredPath.op(contentPath, Path.Op.DIFFERENCE)
         } else if (state == STATE_OUTER) {
-            contentPath.reset()
-            contentPath.moveTo(pointD.x, pointD.y)
-            contentPath.lineTo(pointH.x, pointH.y)
-            contentPath.lineTo(pointA.x, pointA.y)
-            contentPath.quadTo(pointB.x, pointB.y, pointC.x, pointC.y)
-            contentPath.lineTo(paperWidth, 0F)
-            contentPath.lineTo(paperWidth, pointE.y)
-            contentPath.quadTo(pointF.x, pointF.y, pointG.x, pointG.y)
-            contentPath.lineTo(pointI.x, pointI.y)
-            contentPath.close()
+
+            unionPath.reset()
+            unionPath.moveTo(pointD.x, pointD.y)
+            unionPath.lineTo(pointH.x, pointH.y)
+            unionPath.lineTo(pointA.x, pointA.y)
+            unionPath.quadTo(pointB.x, pointB.y, pointC.x, pointC.y)
+            unionPath.lineTo(pointE.x, pointE.y)
+            unionPath.quadTo(pointF.x, pointF.y, pointG.x, pointG.y)
+            unionPath.lineTo(pointI.x, pointI.y)
+            unionPath.close()
 
             val pointb = Coordinate()
             val pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.5F)
             pointb.x = pointbF.x
             pointb.y = pointbF.y
-
             val pointf = Coordinate()
             val pointfF = BazierUtils.getBezierPoint(PointF(pointE.x, pointE.y), PointF(pointF.x, pointF.y), PointF(pointG.x, pointG.y), 0.5F)
             pointf.x = pointfF.x
             pointf.y = pointfF.y
 
+
             dogEaredPath.reset()
             dogEaredPath.moveTo(pointb.x, pointb.y)
-            dogEaredPath.lineTo(pointD.x, pointD.y)
+            dogEaredPath.lineTo(pointC.x, pointC.y)
+            dogEaredPath.lineTo(pointE.x, pointE.y)
             dogEaredPath.lineTo(pointf.x, pointf.y)
             dogEaredPath.close()
 
-            dogEaredPath.op(contentPath, Path.Op.DIFFERENCE)
-
-            unionPath.reset()
             unionPath.op(dogEaredPath, Path.Op.UNION)
-            unionPath.op(contentPath, Path.Op.UNION)
         }
     }
 
@@ -283,7 +296,8 @@ class PaperView : RelativeLayout {
                     translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
                     mPaint.style = Paint.Style.FILL
                     mPaint.color = Color.WHITE
-                    mPaint.shader = LinearGradient(pointD.x / 2F, pointD.y + pointD.x / 2F, pointD.x * 3 / 4F, pointD.y + pointD.x / 4F, shadowColor, Color.WHITE, Shader.TileMode.CLAMP)
+                    mPaint.strokeWidth = 10F
+                    mPaint.shader = LinearGradient(pointD.x / 2F, pointD.y + pointD.x / 2F, pointD.x * 3 / 5F, pointD.y + pointD.x * 2 / 5F, shadowColor, Color.WHITE, Shader.TileMode.CLAMP)
                     drawPath(unionPath, mPaint)
                     mPaint.setShadowLayer(50F, -10F, 10F, shadowColor)
                     drawPath(unionPath, mPaint)
@@ -310,7 +324,7 @@ class PaperView : RelativeLayout {
     private fun initFunc() {
         crimpSizeFunc = CrimpSizeFunc()
         with(crimpSizeFunc!!) {
-            outParamMax = 80F
+            outParamMax = 160F
             outParamMin = 0F
 
             inParamMax = paperWidth * 2
@@ -341,9 +355,17 @@ class PaperView : RelativeLayout {
                 dStartY = pointD.y
             }
             MotionEvent.ACTION_MOVE -> {
+                Log.i(TAG, "crimpSize==>$crimpSize")
                 offset = event.x - downX
                 pointD.x = dStartX + offset
                 pointD.y = dStartY - offset
+                //边界控制
+                if (pointD.x <= 0F) {
+                    pointD.x = 0F
+                }
+                if (pointD.y >= paperHeight) {
+                    pointD.y = paperHeight
+                }
                 executeCrimpSizeFunc(dStartX + offset)
                 configPoint(pointD.x, pointD.y)
                 combinePath()
@@ -359,5 +381,42 @@ class PaperView : RelativeLayout {
             }
         }
         return true
+    }
+
+    /**
+     * 撕页动画
+     */
+    var tearAnim: ValueAnimator? = null
+
+    /**
+     * 开始便利贴撕页动画
+     */
+    fun startTearAnim() {
+        tearAnim?.cancel()
+        tearAnim = ValueAnimator.ofFloat(0F, paperWidth * 2.5F)
+        with(tearAnim!!) {
+            // 图个吉利
+            duration = 888L
+            interpolator = AccelerateInterpolator()
+            dStartX = pointD.x
+            dStartY = pointD.y
+            addUpdateListener {
+                offset = it.animatedValue as Float
+                pointD.x = dStartX + offset
+                pointD.y = dStartY - offset
+                //边界控制
+                if (pointD.x <= 0F) {
+                    pointD.x = 0F
+                }
+                if (pointD.y >= paperHeight) {
+                    pointD.y = paperHeight
+                }
+                executeCrimpSizeFunc(dStartX + offset)
+                configPoint(pointD.x, pointD.y)
+                combinePath()
+                postInvalidate()
+            }
+            start()
+        }
     }
 }

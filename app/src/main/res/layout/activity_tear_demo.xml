@@ -16,7 +16,8 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.pengyeah.tear.PaperView
+    <com.pengyeah.tear.PaperLayout
+        android:id="@+id/paperLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -27,6 +28,15 @@
             android:paddingTop="200dp"
             android:text="TEXTTEXT"
             android:textSize="56sp" />
-    </com.pengyeah.tear.PaperView>
+    </com.pengyeah.tear.PaperLayout>
+
+    <Button
+        android:id="@+id/btnStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="anim"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

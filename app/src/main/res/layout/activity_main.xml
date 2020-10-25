@@ -84,7 +84,7 @@
                 android:id="@+id/btn11"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="纸张撕页"
+                android:text="便利贴撕页"
                 android:visibility="visible" />
 
             <TextView
