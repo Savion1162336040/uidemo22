@@ -1,21 +1,19 @@
 package com.pengyeah.tear
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
 import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
 import com.pengyeah.tear.coordinate.Coordinate
 import com.pengyeah.tear.func.CrimpSizeFunc
 import com.pengyeah.tear.utils.BazierUtils
-import kotlin.math.abs
 
 /**
  *  Created by pengyeah on 2020/10/16
@@ -77,14 +75,14 @@ class PaperLayout : RelativeLayout {
     /**
      * 卷角在内状态
      */
-    val STATE_INNER = 0x01
+    val DRAW_STATE_INNER = 0x01
 
     /**
      * 卷角在外状态
      */
-    val STATE_OUTER = 0x02
+    val DRAW_STATE_OUTER = 0x02
 
-    var state = STATE_INNER
+    var drawState = DRAW_STATE_INNER
 
     /**
      * 各个变化函数
@@ -99,6 +97,7 @@ class PaperLayout : RelativeLayout {
     private fun initView(context: Context?, attrs: AttributeSet?) {
         mPaint.color = paperColor
         mPaint.isAntiAlias = true
+        mPaint.style = Paint.Style.FILL
 
         setWillNotDraw(false)
     }
@@ -121,11 +120,11 @@ class PaperLayout : RelativeLayout {
      */
     private fun configPoint(dx: Float, dy: Float) {
         if (dx >= paperWidth) {
-            state = STATE_OUTER
+            drawState = DRAW_STATE_OUTER
         } else {
-            state = STATE_INNER
+            drawState = DRAW_STATE_INNER
         }
-        if (state == STATE_INNER) {
+        if (drawState == DRAW_STATE_INNER) {
             pointD.x = dx
             pointD.y = dy
 
@@ -146,7 +145,7 @@ class PaperLayout : RelativeLayout {
 
             pointG.x = pointD.x + crimpSize
             pointG.y = paperHeight
-        } else if (state == STATE_OUTER) {
+        } else if (drawState == DRAW_STATE_OUTER) {
             pointD.x = dx
             pointD.y = dy
 
@@ -189,7 +188,7 @@ class PaperLayout : RelativeLayout {
     }
 
     private fun combinePath() {
-        if (state == STATE_INNER) {
+        if (drawState == DRAW_STATE_INNER) {
             contentPath.reset()
             contentPath.moveTo(0F, 0F)
             contentPath.lineTo(pointA.x, pointA.y)
@@ -215,20 +214,33 @@ class PaperLayout : RelativeLayout {
             dogEaredPath.moveTo(pointb.x, pointb.y)
             dogEaredPath.lineTo(pointD.x, pointD.y)
             dogEaredPath.lineTo(pointf.x, pointf.y)
+            dogEaredPath.lineTo(pointb.x, pointb.y)
             dogEaredPath.close()
 
-            dogEaredPath.op(contentPath, Path.Op.DIFFERENCE)
-        } else if (state == STATE_OUTER) {
-
+            unionPath.fillType = Path.FillType.WINDING
             unionPath.reset()
-            unionPath.moveTo(pointD.x, pointD.y)
-            unionPath.lineTo(pointH.x, pointH.y)
+            unionPath.moveTo(0F, 0F)
             unionPath.lineTo(pointA.x, pointA.y)
             unionPath.quadTo(pointB.x, pointB.y, pointC.x, pointC.y)
+            unionPath.lineTo(pointD.x, pointD.y)
             unionPath.lineTo(pointE.x, pointE.y)
             unionPath.quadTo(pointF.x, pointF.y, pointG.x, pointG.y)
-            unionPath.lineTo(pointI.x, pointI.y)
-            unionPath.close()
+            unionPath.lineTo(paperWidth, paperHeight)
+            unionPath.lineTo(paperWidth, 0F)
+            unionPath.lineTo(0F, 0F)
+            unionPath.lineTo(pointb.x, pointb.y)
+            unionPath.lineTo(pointf.x, pointf.y)
+            unionPath.lineTo(paperWidth, paperHeight)
+            unionPath.lineTo(paperWidth, 0F)
+            unionPath.lineTo(0F, 0F)
+
+            dogEaredPath.op(contentPath, Path.Op.DIFFERENCE)
+
+            childContentPath.reset()
+            childContentPath.op(contentPath, Path.Op.UNION)
+            childContentPath.offset((width - paperWidth) / 2F, (height - paperHeight) / 2F)
+
+        } else if (drawState == DRAW_STATE_OUTER) {
 
             val pointb = Coordinate()
             val pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.5F)
@@ -239,20 +251,21 @@ class PaperLayout : RelativeLayout {
             pointf.x = pointfF.x
             pointf.y = pointfF.y
 
+            unionPath.fillType = Path.FillType.WINDING
+            unionPath.reset()
+            unionPath.moveTo(pointD.x, pointD.y)
+            unionPath.lineTo(pointH.x, pointH.y)
+            unionPath.lineTo(pointA.x, pointA.y)
+            unionPath.quadTo(pointB.x, pointB.y, pointC.x, pointC.y)
+            unionPath.lineTo(pointE.x, pointE.y)
+            unionPath.quadTo(pointF.x, pointF.y, pointG.x, pointG.y)
+            unionPath.lineTo(pointI.x, pointI.y)
+            unionPath.lineTo(pointD.x, pointD.y)
+            unionPath.lineTo(pointb.x, pointb.y)
+            unionPath.lineTo(pointf.x, pointf.y)
+            unionPath.lineTo(pointD.x, pointD.y)
 
-            dogEaredPath.reset()
-            dogEaredPath.moveTo(pointb.x, pointb.y)
-            dogEaredPath.lineTo(pointC.x, pointC.y)
-            dogEaredPath.lineTo(pointE.x, pointE.y)
-            dogEaredPath.lineTo(pointf.x, pointf.y)
-            dogEaredPath.close()
-
-            unionPath.op(dogEaredPath, Path.Op.UNION)
         }
-    }
-
-    override fun dispatchDraw(canvas: Canvas?) {
-        super.dispatchDraw(canvas)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -266,32 +279,24 @@ class PaperLayout : RelativeLayout {
 
     private fun drawPaper(canvas: Canvas) {
         with(canvas) {
-            when (state) {
-                STATE_INNER -> {
+            when (drawState) {
+                DRAW_STATE_INNER -> {
                     save()
                     translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
 
                     mPaint.shader = null
                     mPaint.setShadowLayer(50F, -10F, 10F, shadowColor)
-                    unionPath.reset()
-                    unionPath.op(contentPath, Path.Op.UNION)
-                    unionPath.op(dogEaredPath, Path.Op.UNION)
                     drawPath(unionPath, mPaint)
 
-                    mPaint.style = Paint.Style.FILL
-                    mPaint.color = Color.WHITE
-                    mPaint.clearShadowLayer()
-                    drawPath(contentPath, mPaint)
-                    mPaint.style = Paint.Style.FILL
-                    mPaint.color = Color.WHITE
                     mPaint.setShadowLayer(20F, 10F, -10F, shadowColor)
                     drawPath(dogEaredPath, mPaint)
 
                     mPaint.shader = LinearGradient(pointD.x / 2F, pointD.y + pointD.x / 2F, pointD.x * 3 / 4F, pointD.y + pointD.x / 4F, shadowColor, Color.WHITE, Shader.TileMode.CLAMP)
                     drawPath(dogEaredPath, mPaint)
+
                     restore()
                 }
-                STATE_OUTER -> {
+                DRAW_STATE_OUTER -> {
                     save()
                     translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
                     mPaint.style = Paint.Style.FILL
@@ -311,14 +316,22 @@ class PaperLayout : RelativeLayout {
         }
     }
 
-    override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
-        canvas?.save()
-        canvas?.translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
-        canvas?.clipPath(contentPath)
+    /**
+     * 子View画布待裁减path
+     */
+    var childContentPath: Path = Path()
 
-        val flag = super.drawChild(canvas, child, drawingTime)
-        canvas?.restore()
-        return flag
+    override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {
+        if (drawState == DRAW_STATE_INNER) {
+            canvas?.save()
+            canvas?.clipPath(childContentPath)
+
+            val flag = super.drawChild(canvas, child, drawingTime)
+            canvas?.restore()
+            return flag
+        } else {
+            return true
+        }
     }
 
     private fun initFunc() {
@@ -346,7 +359,15 @@ class PaperLayout : RelativeLayout {
     var dStartX: Float = 0F
     var dStartY: Float = 0F
 
+    /**
+     * 是否可交互
+     */
+    var isCanTouch: Boolean = true
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (isCanTouch == false) {
+            return super.onTouchEvent(event)
+        }
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 downX = event.x
@@ -355,16 +376,18 @@ class PaperLayout : RelativeLayout {
                 dStartY = pointD.y
             }
             MotionEvent.ACTION_MOVE -> {
-                Log.i(TAG, "crimpSize==>$crimpSize")
                 offset = event.x - downX
                 pointD.x = dStartX + offset
                 pointD.y = dStartY - offset
+                state = STATE_TEARING
                 //边界控制
                 if (pointD.x <= 0F) {
                     pointD.x = 0F
+                    state = STATE_NORMAL
                 }
                 if (pointD.y >= paperHeight) {
                     pointD.y = paperHeight
+                    state = STATE_NORMAL
                 }
                 executeCrimpSizeFunc(dStartX + offset)
                 configPoint(pointD.x, pointD.y)
@@ -375,11 +398,20 @@ class PaperLayout : RelativeLayout {
                 downX = 0F
                 downY = 0F
                 offset = 0F
+                if (pointD.x <= 0F) {
+                    pointD.x = 0F
+                    state = STATE_NORMAL
+                }
+                if (pointD.y >= paperHeight) {
+                    pointD.y = paperHeight
+                    state = STATE_NORMAL
+                }
             }
             else -> {
 
             }
         }
+        onTearStateChangeListener?.onTearStateChanged(state)
         return true
     }
 
@@ -416,7 +448,26 @@ class PaperLayout : RelativeLayout {
                 combinePath()
                 postInvalidate()
             }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    state = STATE_TEARED
+                    onTearStateChangeListener?.onTearStateChanged(state)
+                }
+            })
             start()
         }
+    }
+
+
+    var state = STATE_NORMAL
+
+    /**
+     * 对外暴露三种状态：正常显示、正在撕、撕完了
+     */
+    var onTearStateChangeListener: OnTearStateChangeListener? = null
+
+    open interface OnTearStateChangeListener {
+        fun onTearStateChanged(tearState: Int)
     }
 }
