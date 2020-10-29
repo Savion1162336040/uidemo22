@@ -200,15 +200,8 @@ class PaperLayout : RelativeLayout {
             contentPath.lineTo(paperWidth, 0F)
             contentPath.close()
 
-            val pointb = Coordinate()
-            val pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.5F)
-            pointb.x = pointbF.x
-            pointb.y = pointbF.y
-
-            val pointf = Coordinate()
-            val pointfF = BazierUtils.getBezierPoint(PointF(pointE.x, pointE.y), PointF(pointF.x, pointF.y), PointF(pointG.x, pointG.y), 0.5F)
-            pointf.x = pointfF.x
-            pointf.y = pointfF.y
+            val pointb = BazierUtils.getBezierPoint(pointA, pointB, pointC, 0.5F)
+            val pointf = BazierUtils.getBezierPoint(pointE, pointF, pointG, 0.5F)
 
             dogEaredPath.reset()
             dogEaredPath.moveTo(pointb.x, pointb.y)
@@ -242,14 +235,8 @@ class PaperLayout : RelativeLayout {
 
         } else if (drawState == DRAW_STATE_OUTER) {
 
-            val pointb = Coordinate()
-            val pointbF = BazierUtils.getBezierPoint(PointF(pointA.x, pointA.y), PointF(pointB.x, pointB.y), PointF(pointC.x, pointC.y), 0.5F)
-            pointb.x = pointbF.x
-            pointb.y = pointbF.y
-            val pointf = Coordinate()
-            val pointfF = BazierUtils.getBezierPoint(PointF(pointE.x, pointE.y), PointF(pointF.x, pointF.y), PointF(pointG.x, pointG.y), 0.5F)
-            pointf.x = pointfF.x
-            pointf.y = pointfF.y
+            val pointb = BazierUtils.getBezierPoint(pointA, pointB, pointC, 0.5F)
+            val pointf = BazierUtils.getBezierPoint(pointE, pointF, pointG, 0.5F)
 
             unionPath.fillType = Path.FillType.WINDING
             unionPath.reset()
@@ -285,10 +272,12 @@ class PaperLayout : RelativeLayout {
                     translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
 
                     mPaint.shader = null
+//                    mPaint.color = Color.RED
                     mPaint.setShadowLayer(50F, -10F, 10F, shadowColor)
                     drawPath(unionPath, mPaint)
 
                     mPaint.setShadowLayer(20F, 10F, -10F, shadowColor)
+//                    mPaint.color = Color.BLUE
                     drawPath(dogEaredPath, mPaint)
 
                     mPaint.shader = LinearGradient(pointD.x / 2F, pointD.y + pointD.x / 2F, pointD.x * 3 / 4F, pointD.y + pointD.x / 4F, shadowColor, Color.WHITE, Shader.TileMode.CLAMP)
@@ -299,9 +288,7 @@ class PaperLayout : RelativeLayout {
                 DRAW_STATE_OUTER -> {
                     save()
                     translate((width - paperWidth) / 2F, (height - paperHeight) / 2F)
-                    mPaint.style = Paint.Style.FILL
-                    mPaint.color = Color.WHITE
-                    mPaint.strokeWidth = 10F
+//                    mPaint.color = Color.BLUE
                     mPaint.shader = LinearGradient(pointD.x / 2F, pointD.y + pointD.x / 2F, pointD.x * 3 / 5F, pointD.y + pointD.x * 2 / 5F, shadowColor, Color.WHITE, Shader.TileMode.CLAMP)
                     drawPath(unionPath, mPaint)
                     mPaint.setShadowLayer(50F, -10F, 10F, shadowColor)
