@@ -306,7 +306,7 @@ public class RulerView2 extends View {
                 }
             } else {
                 //继续惯性滑动
-                movedX = scroller.getCurrX() - scroller.getStartY();
+                movedX = scroller.getCurrX() - scroller.getStartX();
                 //滑动结束:边界控制
                 if (offsetStart + movedX > 0) {
                     movedX = 0;
