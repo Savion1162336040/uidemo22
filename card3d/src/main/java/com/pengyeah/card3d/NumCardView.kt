@@ -6,6 +6,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.IntRange
@@ -313,7 +314,8 @@ class NumCardView : View {
             mPaint.color = Color.WHITE
             mPaint.setShadowLayer(cardShadowSize, 0F, cardShadowDistance, Color.GRAY)
 
-            val rectF = RectF(paddingSize, paddingSize + cardHeight, paddingSize + cardWidth, paddingSize + cardHeight * 2)
+            val rectF = RectF(paddingSize, paddingSize + cardHeight,
+                    paddingSize + cardWidth, paddingSize + cardHeight * 2)
             drawRoundRect(
                     rectF,
                     20F,
@@ -330,23 +332,45 @@ class NumCardView : View {
                 if (curState == STATE_UP_ING) {
                     //绘制下一个倒置翻转的数字图片
                     if (curShowNum + 1 <= 9) {
-                        tempBm = Bitmap.createBitmap(numBms[curShowNum + 1], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                        tempBm = Bitmap.createBitmap(numBms[curShowNum + 1],
+                                0, 0, curNumBm.width,
+                                curNumBm.height, matrix, false)
                     }
                 } else if (curState == STATE_DOWN_ING) {
                     //往下翻
                     if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
                         //绘制前一个数字
                         if (curShowNum - 1 >= 0) {
-                            tempBm = Bitmap.createBitmap(numBms[curShowNum - 1], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                            tempBm = Bitmap.createBitmap(numBms[curShowNum - 1],
+                                    0,
+                                    0,
+                                    curNumBm.width,
+                                    curNumBm.height,
+                                    matrix,
+                                    false)
                         } else {
-                            tempBm = Bitmap.createBitmap(numBms[0], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                            tempBm = Bitmap.createBitmap(numBms[0],
+                                    0,
+                                    0,
+                                    curNumBm.width,
+                                    curNumBm.height,
+                                    matrix,
+                                    false)
                         }
                     } else {
-                        tempBm = Bitmap.createBitmap(numBms[curShowNum], 0, 0, curNumBm.width, curNumBm.height, matrix, false)
+                        tempBm = Bitmap.createBitmap(numBms[curShowNum],
+                                0, 0,
+                                curNumBm.width, curNumBm.height, matrix, false)
                     }
                 }
                 tempBm?.let {
-                    drawBitmap(it, Rect(0, it.height / 2, it.width, it.height), rectF, mPaint)
+                    drawBitmap(it,
+                            Rect(0,
+                                    it.height / 2,
+                                    it.width,
+                                    it.height),
+                            rectF,
+                            mPaint)
                 }
             } else {
                 if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
@@ -356,10 +380,22 @@ class NumCardView : View {
                         tempBm = numBms[curShowNum - 1]
                     }
                     tempBm?.let {
-                        drawBitmap(it, Rect(0, it.height / 2, it.width, it.height), rectF, mPaint)
+                        drawBitmap(it,
+                                Rect(0,
+                                        it.height / 2,
+                                        it.width,
+                                        it.height),
+                                rectF,
+                                mPaint)
                     }
                 } else {
-                    drawBitmap(curNumBm, Rect(0, curNumBm.height / 2, curNumBm.width, curNumBm.height), rectF, mPaint)
+                    drawBitmap(curNumBm,
+                            Rect(0,
+                                    curNumBm.height / 2,
+                                    curNumBm.width,
+                                    curNumBm.height),
+                            rectF,
+                            mPaint)
                 }
             }
 
@@ -488,23 +524,47 @@ class NumCardView : View {
                 if (rotateX >= 90F) {
                     if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
                         if (curShowNum + 1 <= 9) {
+                            Log.e("savion",String.format("惯性回弹2:%s___%s___%s",
+                                    "1",
+                                    cardRotateFunc!!.initValue,
+                                    rotateY))
                             startCardUpAnim(curShowNum + 1)
                         } else {
+                            Log.e("savion",String.format("惯性回弹2:%s___%s___%s",
+                                    "2",
+                                    cardRotateFunc!!.initValue,
+                                    rotateY))
                             curShowNum = 9
                             startCardDownAnim(9)
                         }
                     } else {
+                        Log.e("savion",String.format("惯性回弹2:%s___%s___%s",
+                                "3",
+                                cardRotateFunc!!.initValue,
+                                rotateY))
                         startCardUpAnim(curShowNum)
                     }
                 } else {
                     if (abs(cardRotateFunc!!.initValue - rotateX) >= 90F) {
                         if (curShowNum - 1 >= 0) {
+                            Log.e("savion",String.format("惯性回弹:%s___%s___%s",
+                                    "1",
+                                    cardRotateFunc!!.initValue,
+                                    rotateY))
                             startCardDownAnim(curShowNum - 1)
                         } else {
+                            Log.e("savion",String.format("惯性回弹:%s___%s___%s",
+                                    "2",
+                                    cardRotateFunc!!.initValue,
+                                    rotateY))
                             curShowNum = 0
                             startCardUpAnim(0)
                         }
                     } else {
+                        Log.e("savion",String.format("惯性回弹:%s___%s___%s",
+                                "3",
+                                cardRotateFunc!!.initValue,
+                                rotateY))
                         startCardDownAnim(curShowNum)
                     }
                 }

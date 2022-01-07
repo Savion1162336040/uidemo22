@@ -1,5 +1,6 @@
 package com.pengyeah.card3d.func
 
+import android.util.Log
 import com.pengyeah.flowview.func.BaseFuncImpl
 
 /**
@@ -13,13 +14,17 @@ class CardRotateFunc : BaseFuncImpl {
 
     override fun execute(inParam: Float): Float {
         if (inParam > inParamMax) {
+            Log.e("savion", String.format("计算角度2，出参最小:%s==%s==%s", inParam, inParamMax, inParamMin))
             return outParamMin
         } else if (inParam < inParamMin) {
+            Log.e("savion", String.format("计算角度2，出参最大:%s==%s==%s", inParam, inParamMax, inParamMin))
             return outParamMax
         } else {
             //斜率
             val rate = (outParamMin - outParamMax) / (inParamMax - inParamMin)
-            return outParamMax + inParam * rate
+            val result = outParamMax + inParam * rate;
+            Log.e("savion", String.format("计算角度2，出参斜率:%s==%s==%s==%s__%s", inParam, inParamMax, inParamMin, rate, result))
+            return result
         }
     }
 }

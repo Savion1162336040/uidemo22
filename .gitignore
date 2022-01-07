@@ -12,3 +12,8 @@
 /captures
 .externalNativeBuild
 .cxx
+/.idea/
+/app/src/androidTest/
+/app/src/test/
+/card3d/src/androidTest/
+/card3d/src/test/
